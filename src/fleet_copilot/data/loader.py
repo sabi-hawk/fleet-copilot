@@ -1,10 +1,4 @@
-"""Load and validate the NDJSON telemetry export.
-
-The loader is deliberately defensive: malformed lines are recorded as data
-quality issues instead of crashing the copilot, and optional sections
-(battery, network) are allowed to be missing because the dataset contains
-such snapshots.
-"""
+"""NDJSON telemetry loader."""
 
 from __future__ import annotations
 

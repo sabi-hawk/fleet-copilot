@@ -11,7 +11,7 @@ statement it makes cites evidence that traces back to a line of the raw dataset.
 | Held-out paraphrases (14 cases, never tuned against) | **11/14**; all 3 failures are safe declines | **14/14** on both full runs |
 | Safety invariants | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit chain intact | same: **0 / 0 / 0**, audit chain intact on every run |
 | Determinism | 50/50 byte-identical answers across repeated runs | `temperature` 0 and a fixed seed; outcome-level variance observed (see details) |
-| Unit/integration tests | 114 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
+| Unit/integration tests | 118 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
 
 > **What ran live and what did not.** The copilot has three interchangeable reasoners behind one graph: **Claude**
 > (Anthropic SDK, `claude-opus-5-5` by default), **Gemini** (Google Gen AI SDK) and a **deterministic rule-based reasoner**.
@@ -46,8 +46,8 @@ git clone <this-repo> fleet-copilot && cd fleet-copilot
 python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
-pip install -e ".[dev]"                 # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 114 tests, ~10 seconds, no network
+pip install -e ".[dev,ui]"              # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
+pytest                                  # 118 tests, ~20 seconds, no network
 ```
 
 **Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
@@ -61,7 +61,7 @@ else Gemini, else the deterministic reasoner, and says which one it picked.
 | `FLEET_COPILOT_EFFORT` | `high` | Claude `output_config.effort` (`none` omits it, for models that don't support effort) |
 | `FLEET_COPILOT_REFUSAL_FALLBACK` | `on` | Claude server-side refusal fallback (`fallbacks: "default"`) on models that support it |
 | `GEMINI_API_KEY` | (unset) | enables the Gemini reasoner |
-| `FLEET_COPILOT_GEMINI_MODEL` | `gemini-3.5-flash` | Gemini model ID |
+| `FLEET_COPILOT_GEMINI_MODEL` | `gemini-3.5-flash-lite` | Gemini model ID (larger free-tier quota than `gemini-3.5-flash`) |
 | `FLEET_COPILOT_GEMINI_THINKING` | `LOW` | Gemini thinking level (`MINIMAL`/`LOW`/`MEDIUM`/`HIGH`, `none` omits it) |
 | `FLEET_COPILOT_LLM_TIMEOUT` | `120` | per-request timeout in seconds (timeouts and 429/5xx are retried with backoff) |
 | `FLEET_COPILOT_LLM_MIN_INTERVAL` | `0` | minimum seconds between LLM calls, to stay under free-tier rate limits |
@@ -71,6 +71,24 @@ else Gemini, else the deterministic reasoner, and says which one it picked.
 ## 2. Running the agent
 
 Every session is bound to **one tenant** (in production this comes from the admin's identity; here it is `--tenant`).
+
+### Web UI
+
+```bash
+fleet-copilot ui          # opens http://localhost:8501
+```
+
+| Area | What it does |
+|---|---|
+| Sidebar | Pick the organization (the session is bound to it), the reasoner (Offline, plus Gemini or Claude when a key is set) and the approver identity |
+| 💬 Copilot | Chat with one-click example questions: the brief's questions, insights, actions and guardrail probes. Every answer shows its cited evidence (with dataset line numbers), the plan and the tool calls. Action proposals appear as approval cards with Approve/Reject per proposal; nothing runs until you submit. |
+| 📊 Fleet insights | Every detector's findings for the organization, ranked by severity, each with evidence and explanation |
+| 📦 Action outbox | Tickets, orders, replacement flags and notifications that were approved and executed |
+| 🧾 Audit log | The organization's audit events, plus a button to verify the hash chain |
+
+The UI keeps its own outbox and audit log under `var/ui/`; **Reset demo data** clears them.
+
+### Command line
 
 ```bash
 fleet-copilot tenants                                    # acme-001, globex-002, initech-003
@@ -125,7 +143,7 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 114 unit/integration tests
+pytest                                                   # 118 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
 fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases; 11/14 is below the default gate)
 fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
@@ -255,9 +273,9 @@ src/fleet_copilot/
   agent/                 graph.py (LangGraph), session.py, state.py, prompts.py, reasoners/{claude,gemini,rule_based}.py
   actions.py, audit.py   action outbox (idempotent), hash-chained audit log
   evals/runner.py        evaluation runner and metrics
-  cli.py                 fleet-copilot CLI
+  cli.py, ui/app.py      fleet-copilot CLI and Streamlit web UI
 evals/golden/*.yaml      golden cases       evals/heldout/*.yaml    held-out paraphrases
-tests/                   114 tests          docs/                   dataset profile, assumptions
+tests/                   118 tests          docs/                   dataset profile, assumptions
 ```
 
 ## 5. Tool catalog

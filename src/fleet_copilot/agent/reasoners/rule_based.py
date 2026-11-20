@@ -1,12 +1,4 @@
-"""Deterministic reasoner: rule-based intent parsing, planning and templated answers.
-
-It drives the exact same graph, tools, policy gate, approval interrupt and
-grounding verifier as the Claude reasoner, which makes it:
-- the reproducible baseline for the evaluation suite (byte-identical answers);
-- a keyless fallback so the copilot is fully runnable offline.
-Coverage is intentionally limited to the request families in the assessment
-(Q&A, insights, the four actions). Anything else is declined, never guessed.
-"""
+"""Deterministic reasoner, used offline and as the evaluation baseline."""
 
 from __future__ import annotations
 
@@ -42,8 +34,6 @@ def _derive(desc: str, tools: list[str], kind: str, **params: Any) -> dict:
 
 class RuleBasedReasoner:
     name = "rule_based"
-
-    # ------------------------------------------------------------------ parsing
     def _entities(self, question: str, rctx: ReasonerContext) -> dict[str, Any]:
         q = question.lower()
         catalog = rctx.view.check_catalog()
@@ -86,8 +76,6 @@ class RuleBasedReasoner:
         wants_action = _has(q, "open", "create", "raise", "file", "flag", "order", "upgrade", "notify", "message", "tell ", "email",
                             "propose", "remediat", "replace", "fix", "take action", "what should")
         devs = e["devices"]
-
-        # -------------------------------------------------- actions
         if wants_action and _has(q, "ticket", "remediation", "remediate") and not _has(q, "replace", "upgrade", "notify"):
             intent, compose = "action", "actions"
             if devs:
@@ -134,7 +122,6 @@ class RuleBasedReasoner:
             steps.append(_derive("Propose the detector-recommended action for each high-severity finding",
                                  ["create_upgrade_order", "open_remediation_ticket", "flag_device_for_replacement", "notify_employee"],
                                  "from_scan"))
-        # -------------------------------------------------- insights / trends
         elif _has(q, "drift", "over time", "trend", "worsen", "regress") and _has(q, "complian", "check", "screen", "encrypt", "up to date"):
             intent, compose = "insight", "insights"
             steps.append(_step("Detect compliance drift over the window", "detect_compliance_drift",
@@ -216,8 +203,6 @@ class RuleBasedReasoner:
         if _has(q, "software"):
             cats.append("software_change")
         return cats or None
-
-    # ------------------------------------------------------------------ acting
     def act(self, state: dict[str, Any], rctx: ReasonerContext, force_final: bool = False, note: str | None = None) -> ActResult:
         plan = state.get("plan") or {}
         steps = plan.get("steps", [])
@@ -238,8 +223,6 @@ class RuleBasedReasoner:
     def revise(self, state: dict[str, Any], rctx: ReasonerContext, issues: list[str]) -> ActResult:
         # Templated answers only use ledger facts; a failure here is a bug, so fall back to the evidence-only answer.
         return ActResult(draft=None, stop_reason="revision_unavailable")
-
-    # ------------------------------------------------------------------ derived steps
     @staticmethod
     def _records(state: dict[str, Any], name: str) -> list[dict[str, Any]]:
         return [r for r in state.get("tool_calls", []) if r["name"] == name and r.get("ok")]
@@ -323,8 +306,6 @@ class RuleBasedReasoner:
                         calls.append({"name": a["tool"], "args": a["args"]})
             return calls
         return []
-
-    # ------------------------------------------------------------------ composing
     def _compose(self, state: dict[str, Any], rctx: ReasonerContext) -> str:
         plan = state.get("plan") or {}
         mode = plan.get("compose", "decline")

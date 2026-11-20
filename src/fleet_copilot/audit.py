@@ -1,11 +1,4 @@
-"""Append-only, hash-chained audit log (JSONL).
-
-Every security-relevant event (input-guard decisions, plans, tool calls,
-cross-tenant attempts, proposals, policy verdicts, approval decisions, action
-executions, final answers, grounding results) is appended as one JSON line.
-Each record carries the SHA-256 of the previous record, so any edit, deletion
-or reordering of history is detectable with `verify_chain`.
-"""
+"""Append-only, hash-chained audit log."""
 
 from __future__ import annotations
 

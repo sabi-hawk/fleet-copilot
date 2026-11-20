@@ -1,16 +1,4 @@
-"""Tool abstractions shared by the read, insight and action tools.
-
-Design rules for every tool:
-- Tenant scope is bound at construction (via `ToolContext.view`); no tool takes
-  a company_id parameter, so the model cannot even express a cross-tenant call.
-- Arguments are validated with a strict pydantic model (unknown fields are
-  rejected) before the handler runs; validation errors go back to the model as
-  `is_error` tool results so it can self-correct.
-- Every factual output is registered in the evidence ledger and returned with
-  its citation IDs; the model sees `{summary, data, evidence: {E#: claim}}`.
-- Action tools never change state: they create proposals that the policy gate
-  and a human must approve.
-"""
+"""Tool specs, registry and execution."""
 
 from __future__ import annotations
 

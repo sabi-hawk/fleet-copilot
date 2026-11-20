@@ -1,23 +1,4 @@
-"""Action policy engine: evidence-sufficiency rules for every state-changing tool.
-
-The engine never trusts the model's justification text. For each proposed
-action it independently recomputes the relevant signals from tenant telemetry,
-registers them as citable evidence, and allows the action only if a rule's
-evidence bar is met. Rejections carry a concrete, data-backed reason.
-
-Rules (thresholds from config.Thresholds):
-- create_upgrade_order: memory needs sustained RAM pressure and a larger spec;
-  storage needs low/consistently-low/projected-exhaustion storage and a larger
-  spec; battery needs a degraded battery condition or capacity fade.
-- open_remediation_ticket: the check must exist and be failing on the device's
-  latest snapshot; no duplicate open ticket.
-- flag_device_for_replacement: needs a replacement-grade signal (battery
-  end-of-life or sustained RAM saturation); storage pressure alone is
-  remediable and does not qualify.
-- notify_employee: the employee must belong to the tenant and own a device
-  with an active telemetry-backed issue; the message must be non-empty,
-  bounded, free of credentials and of other tenants' identifiers.
-"""
+"""Evidence requirements for state-changing actions."""
 
 from __future__ import annotations
 
@@ -76,8 +57,6 @@ class ActionPolicyEngine:
         self.th = thresholds
         self.store = store
         self.foreign = foreign_identifiers or set()
-
-    # ------------------------------------------------------------------ helpers
     def _signal(self, name: str, claim: str, device_id: str | None, snapshots: list, fields: dict | None = None, period: list | None = None) -> dict[str, Any]:
         eid = self.ledger.add(tool=self.TOOL, claim=claim, device_id=device_id, snapshots=snapshots, fields=fields or {}, period=period)
         return {"name": name, "claim": claim, "evidence_id": eid}
@@ -85,9 +64,7 @@ class ActionPolicyEngine:
     def _deny(self, rule: str, *reasons: str, signals: list | None = None) -> PolicyDecision:
         return PolicyDecision(False, rule, list(reasons), signals or [])
 
-    # Each signal helper registers what the data shows as citable evidence and returns
-    # (positive_signal | None, observed_signal). A rejection therefore cites the same kind
-    # of evidence an approval would: refusals are evidenced too.
+    # Signal helpers return (positive_signal | None, observed_signal) so rejections are evidenced too.
     def _battery_signal(self, did: str) -> tuple[dict | None, dict]:
         hist = self.view.history(did)
         bs = [s for s in hist if s.battery and s.battery.full_charge_capacity]
@@ -133,8 +110,6 @@ class ActionPolicyEngine:
             did, [p["last"]], {"disk.free_pct": round(ld.free_pct, 1)},
         )
         return (sig if positive else None), sig, p
-
-    # ------------------------------------------------------------------ rules
     def evaluate(self, tool: str, args: dict[str, Any]) -> PolicyDecision:
         try:
             if tool == "create_upgrade_order":

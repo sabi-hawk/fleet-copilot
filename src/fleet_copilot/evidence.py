@@ -1,11 +1,4 @@
-"""Evidence ledger: the single source of citable facts in a session.
-
-Every tool that reads telemetry registers what it observed here and receives
-stable citation IDs (E1, E2, ...). Answers may only cite IDs from this ledger
-and the grounding verifier checks that. Each item points to concrete snapshot
-IDs (`<device_id>@<collected_at>`) and NDJSON line numbers, so any statement
-can be traced back to raw records.
-"""
+"""Evidence ledger that backs answer citations."""
 
 from __future__ import annotations
 
@@ -112,11 +105,7 @@ class EvidenceLedger:
         return list(self._items.values())
 
     def devices(self) -> set[str]:
-        """Devices an evidence item is about (device_id) or explicitly names in its claim.
-
-        Aggregate evidence references many snapshots (e.g. "evaluated all 10 devices, 2 matched"); being
-        *evaluated* is not support for a claim about a device, so referenced snapshot IDs do not count.
-        """
+        """Devices that some evidence item is about or names. Being in an aggregate's scope does not count."""
         out: set[str] = set()
         for ev in self._items.values():
             if ev.device_id:

@@ -1,10 +1,4 @@
-"""CopilotSession: the public entry point used by the CLI, the eval runner and tests.
-
-A session is bound to exactly one tenant at creation (in a real deployment the
-tenant comes from the administrator's authenticated identity, never from the
-prompt). Each session is one checkpointed LangGraph thread; `ask` runs a turn
-and `resolve_approval` resumes a turn paused at the human-approval interrupt.
-"""
+"""Session API used by the CLI, UI and evaluation runner."""
 
 from __future__ import annotations
 
@@ -104,8 +98,6 @@ class CopilotSession:
                           data={"reasoner": self.reasoner.name,
                                 "model": {"claude": self.settings.model, "gemini": self.settings.gemini_model}.get(self.reasoner.name),
                                 "dataset": str(self.settings.dataset_path)})
-
-    # ------------------------------------------------------------------ public API
     @property
     def pending_approval(self) -> dict[str, Any] | None:
         snap = self.graph.get_state(self._config)
@@ -141,8 +133,6 @@ class CopilotSession:
     @property
     def ledger(self) -> EvidenceLedger:
         return EvidenceLedger(self.graph.get_state(self._config).values.get("evidence", []))
-
-    # ------------------------------------------------------------------ helpers
     def _result(self) -> TurnResult:
         snap = self.graph.get_state(self._config)
         v = snap.values

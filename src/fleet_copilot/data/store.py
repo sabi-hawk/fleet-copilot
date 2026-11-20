@@ -1,12 +1,4 @@
-"""Telemetry store with tenant isolation enforced at the data-access layer.
-
-`TelemetryStore` holds every tenant's data and is only used by the platform
-layer (session bootstrap, guardrails). Agents and tools only ever receive a
-`TenantView`, which physically cannot return another tenant's records: every
-lookup is filtered by the bound `company_id`, and lookups of foreign IDs raise
-the same `NotFoundInTenant` error as non-existent IDs (no existence oracle),
-while reporting the attempt to a security callback for the audit log.
-"""
+"""Telemetry store and tenant-scoped views."""
 
 from __future__ import annotations
 

@@ -1,16 +1,4 @@
-"""Reasoner interface: the swappable 'brain' of the agent graph.
-
-The graph (guard -> plan -> agent<->tools loop -> reflect -> policy -> approval
--> execute -> compose -> verify) is identical for every reasoner. A reasoner
-only decides (a) the plan, (b) the next tool calls or the draft answer, and
-(c) how to revise a draft the grounding verifier rejected.
-
-Two implementations ship:
-- ClaudeReasoner: Claude via the Anthropic SDK (planning with structured
-  output, native tool calling, revision on verifier feedback).
-- RuleBasedReasoner: deterministic intent parser + templated composer. Used
-  for keyless runs, CI and as the reproducible baseline in evaluations.
-"""
+"""Reasoner interface used by the agent graph."""
 
 from __future__ import annotations
 

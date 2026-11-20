@@ -1,20 +1,4 @@
-"""Gemini-backed reasoner (Google Gen AI SDK, `google-genai`), called from LangGraph nodes.
-
-A second, interchangeable LLM provider behind the same Reasoner interface as
-ClaudeReasoner: same graph, tools, policy gate, approval interrupt, grounding
-verifier and evaluation suite. Only the provider plumbing differs:
-
-- plan():   one structured-output call (response_json_schema = PLAN_SCHEMA).
-- act():    one generate_content call with the tenant-scoped tools declared as
-            JSON-Schema function declarations; automatic function calling is
-            DISABLED so every call goes through the graph's tool node.
-- revise(): re-ask with the verifier's issues and function calling mode NONE.
-
-Determinism: temperature 0 and a fixed seed. The transcript is append-only and
-model content (including thought signatures) is replayed unchanged.
-Free-tier friendliness: optional pacing between calls (FLEET_COPILOT_LLM_MIN_INTERVAL)
-and retry with backoff on 429/5xx; an exhausted daily quota stops with a clear error.
-"""
+"""Gemini reasoner (google-genai SDK)."""
 
 from __future__ import annotations
 
@@ -71,8 +55,6 @@ class GeminiReasoner:
         self.model = settings.gemini_model
         self._last_call = 0.0
         self._tools_cache: list | None = None
-
-    # ------------------------------------------------------------------ API plumbing
     def _tools(self, rctx: ReasonerContext) -> list:
         if self._tools_cache is None:
             t = self.types
@@ -135,8 +117,6 @@ class GeminiReasoner:
 
     def _user(self, text: str) -> dict[str, Any]:
         return {"role": "user", "parts": [{"text": text}]}
-
-    # ------------------------------------------------------------------ planning
     def plan(self, state: dict[str, Any], rctx: ReasonerContext) -> PlanResult:
         ctxline, msg = planner_message(state, rctx)
         resp = self._generate([self.types.Content.model_validate(self._user(msg))], system=PLANNER_SYSTEM, json_schema=PLAN_SCHEMA)
@@ -149,8 +129,6 @@ class GeminiReasoner:
                     "assumptions": ["planner output could not be parsed; proceeding without a fixed plan"]}
         plan = normalize_plan(plan, state["question"], set(rctx.registry.names()), self.name)
         return PlanResult(plan=plan, transcript_add=[self._user(agent_turn_message(ctxline, state["question"], plan))])
-
-    # ------------------------------------------------------------------ acting
     def _call_agent(self, state: dict[str, Any], rctx: ReasonerContext, add: list[dict], mode: str) -> ActResult:
         transcript = list(state.get("transcript", [])) + add
         resp = self._generate(self._contents(transcript), system=AGENT_SYSTEM, tools=self._tools(rctx), mode=mode)

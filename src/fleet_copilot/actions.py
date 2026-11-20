@@ -1,12 +1,4 @@
-"""Action outbox: the (simulated) downstream systems that approved actions write to.
-
-The assessment's action tools are state-changing. Here, "executing" an action
-means writing an idempotent record into a tenant-partitioned JSON outbox
-(tickets, upgrade orders, replacement flags, employee notifications) that a
-real integration (ServiceNow, procurement, email) would consume. Nothing is
-ever written here without a policy pass AND an explicit human approval; the
-graph enforces that ordering and `execute` re-checks the approval record.
-"""
+"""Outbox for approved actions."""
 
 from __future__ import annotations
 

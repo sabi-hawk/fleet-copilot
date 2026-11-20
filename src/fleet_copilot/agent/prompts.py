@@ -1,6 +1,4 @@
-"""Prompts for the Claude reasoner. Kept static (no per-request values) so the
-system prompt + tool definitions form a cacheable prefix; per-tenant/per-turn
-context goes into the user message instead."""
+"""Prompts shared by the LLM reasoners."""
 
 AGENT_SYSTEM = """You are Fleet Copilot, an assistant for IT administrators. You answer questions about their organisation's managed devices using telemetry tools, surface insights and trends, and propose operational actions.
 

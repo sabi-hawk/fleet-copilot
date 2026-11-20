@@ -1,21 +1,4 @@
-"""Claude-backed reasoner (Anthropic Python SDK, called from LangGraph nodes).
-
-- plan(): one structured-output call (JSON schema) producing a tool-level plan.
-- act(): one Messages API call with the tenant-scoped tools; returns tool_use
-  calls for the graph's tool node, or the final draft answer.
-- revise(): re-asks for an answer (tools disabled) with the grounding
-  verifier's issues when the draft cited unknown evidence or unsupported IDs.
-
-Model behaviour notes (claude-opus-5-5 by default, configurable):
-- No sampling parameters are sent (current models reject temperature); answer
-  determinism comes from deterministic tools, evidence IDs and verification.
-- Thinking is adaptive and always on for current models; effort is set via
-  output_config (FLEET_COPILOT_EFFORT, default "high").
-- The transcript is append-only and assistant content blocks (including
-  thinking blocks) are passed back unchanged.
-- Server-side refusal fallback is enabled by default on models that support
-  it (FLEET_COPILOT_REFUSAL_FALLBACK=off to disable).
-"""
+"""Claude reasoner (Anthropic SDK)."""
 
 from __future__ import annotations
 
@@ -70,8 +53,6 @@ class ClaudeReasoner:
         self.client = client
         self.settings = settings
         self.use_fallback = settings.refusal_fallback and settings.model in REFUSAL_FALLBACK_MODELS
-
-    # ------------------------------------------------------------------ API plumbing
     def _create(self, *, system: str, messages: list[dict], tools: list[dict] | None = None,
                 tool_choice: dict | None = None, output_format: dict | None = None) -> Any:
         kwargs: dict[str, Any] = {
@@ -99,8 +80,6 @@ class ClaudeReasoner:
     @staticmethod
     def _text(content: list[dict]) -> str:
         return "\n".join(b["text"] for b in content if b.get("type") == "text").strip()
-
-    # ------------------------------------------------------------------ planning
     def plan(self, state: dict[str, Any], rctx: ReasonerContext) -> PlanResult:
         ctxline, msg = planner_message(state, rctx)
         resp = self._create(system=PLANNER_SYSTEM, messages=[{"role": "user", "content": msg}],
@@ -118,8 +97,6 @@ class ClaudeReasoner:
         plan = normalize_plan(plan, state["question"], set(rctx.registry.names()), self.name)
         opening = {"role": "user", "content": agent_turn_message(ctxline, state["question"], plan)}
         return PlanResult(plan=plan, transcript_add=[opening])
-
-    # ------------------------------------------------------------------ acting
     def _call_agent(self, state: dict[str, Any], rctx: ReasonerContext, add: list[dict], tool_choice: dict | None) -> ActResult:
         messages = list(state.get("transcript", [])) + add
         resp = self._create(system=AGENT_SYSTEM, messages=messages, tools=rctx.registry.anthropic_tools(), tool_choice=tool_choice)

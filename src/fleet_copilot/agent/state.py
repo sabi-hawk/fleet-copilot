@@ -1,11 +1,4 @@
-"""LangGraph state for one copilot session (a checkpointed thread).
-
-Persistent across turns: session_id, tenant_id, transcript (LLM conversation,
-append-only), evidence (ledger), history. Everything else is reset at the start
-of each turn by `CopilotSession.ask`. All values are plain JSON-compatible data
-so the checkpointer can persist and resume them (e.g. across the human-approval
-interrupt).
-"""
+"""Graph state for a copilot session."""
 
 from __future__ import annotations
 

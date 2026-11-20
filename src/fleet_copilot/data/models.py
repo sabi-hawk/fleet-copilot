@@ -1,9 +1,4 @@
-"""Normalized, immutable views of telemetry snapshots.
-
-Each NDJSON record becomes one `Snapshot`. The original line number is kept so
-that every piece of evidence the copilot cites can be traced back to the exact
-raw record (`source_line`).
-"""
+"""Normalized telemetry snapshot models."""
 
 from __future__ import annotations
 

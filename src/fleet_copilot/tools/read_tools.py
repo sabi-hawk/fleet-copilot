@@ -1,9 +1,4 @@
-"""Read-only telemetry tools (grounded question answering).
-
-"Current" state always means each device's most recent snapshot; every answer
-row carries the snapshot date so staleness is visible. Battery fields fall back
-to the most recent snapshot that contained a battery section, and say so.
-"""
+"""Read-only telemetry tools."""
 
 from __future__ import annotations
 
@@ -64,9 +59,6 @@ def _device_claim(row: dict) -> str:
     parts.append("failing checks: " + (", ".join(row["failing_checks"]) if row["failing_checks"] else "none"))
     parts.append(f"employee {row['employee_id']}")
     return "; ".join(parts)
-
-
-# --------------------------------------------------------------------------- fleet overview
 class FleetOverviewArgs(_Args):
     pass
 
@@ -100,9 +92,6 @@ def fleet_overview(ctx: ToolContext, _: FleetOverviewArgs) -> ToolOutput:
         "compliance_checks": checks,
     }
     return ToolOutput(f"{len(latest)} devices, {len(v.employees())} employees, telemetry {v.window_label}.", data, ev)
-
-
-# --------------------------------------------------------------------------- find devices
 class FindDevicesArgs(_Args):
     device_type: Literal["laptop", "desktop"] | None = Field(None, description="Restrict to laptops or desktops.")
     os_name: Literal["macOS", "Windows"] | None = Field(None, description="Restrict to an OS family.")
@@ -183,9 +172,6 @@ def find_devices(ctx: ToolContext, a: FindDevicesArgs) -> ToolOutput:
     data = {"criteria": criteria, "matched_count": len(rows), "evaluated_devices": len(latest), "scope_evidence_id": scope_id,
             "not_comparable_other_os_family": sorted(not_comparable), "devices": rows, "as_of": v.as_of}
     return ToolOutput(scope_claim, data, [scope_id] + ev)
-
-
-# --------------------------------------------------------------------------- device details
 class DeviceDetailsArgs(_Args):
     device_id: str = Field(..., description="Device ID (serial), e.g. '1LYSSFD074BB'.")
 
@@ -217,9 +203,6 @@ def device_details(ctx: ToolContext, a: DeviceDetailsArgs) -> ToolOutput:
             "snapshot_count": prof.snapshot_count,
             "battery_note": None if b is None or b is s else f"latest snapshot has no battery section; battery data is from {b.date}"}
     return ToolOutput(f"Details for {s.device_id} as of {s.date}.", data, ev)
-
-
-# --------------------------------------------------------------------------- metric history
 METRICS = Literal["disk_free_pct", "disk_free_gb", "memory_used_pct", "battery_full_charge_capacity",
                   "battery_cycle_count", "battery_condition", "compliance_status"]
 
@@ -298,9 +281,6 @@ def metric_history(ctx: ToolContext, a: MetricHistoryArgs) -> ToolOutput:
         summary["transitions"] = [{"date": s.date, "value": val} for s, val in changes]
     data = {"device_id": did, "metric": label, "summary": summary, "series": series, "missing_dates": missing}
     return ToolOutput(f"{len(present)} '{label}' readings for {did} ({present[0][0].date} to {present[-1][0].date}).", data, ev)
-
-
-# --------------------------------------------------------------------------- compliance status
 class ComplianceStatusArgs(_Args):
     check_id: str | None = Field(None, description="Restrict to one check (e.g. 'disk_encryption'). Omit for all checks.")
     severity: Literal["high", "medium", "low"] | None = Field(None, description="Restrict to checks of this severity.")
@@ -341,9 +321,6 @@ def compliance_status(ctx: ToolContext, a: ComplianceStatusArgs) -> ToolOutput:
     data = {"catalog": catalog, "checks": per_check, "devices": rows, "as_of": v.as_of, "scope": scope}
     total = len(rows)
     return ToolOutput(f"{total} device/check pairs with status '{a.status}' across {len(checks)} check(s) and {scope}.", data, ev)
-
-
-# --------------------------------------------------------------------------- software search
 class SoftwareSearchArgs(_Args):
     name_contains: str = Field(..., min_length=2, description="Case-insensitive substring of the application name, e.g. 'uTorrent'.")
 
@@ -369,9 +346,6 @@ def software_search(ctx: ToolContext, a: SoftwareSearchArgs) -> ToolOutput:
                            claim=f"'{a.name_contains}' found on {len(rows)} of {len(latest)} devices at their latest snapshots (as of {v.as_of})",
                            snapshots=latest, fields={"query": a.name_contains, "matches": len(rows)})
     return ToolOutput(f"'{a.name_contains}' installed on {len(rows)} of {len(latest)} devices.", {"query": a.name_contains, "devices": rows}, [scope] + ev)
-
-
-# --------------------------------------------------------------------------- employee devices
 class EmployeeDevicesArgs(_Args):
     employee_id: str = Field(..., description="Employee ID, e.g. 'emp-acme-1002'.")
 

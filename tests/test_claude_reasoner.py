@@ -1,12 +1,4 @@
-"""ClaudeReasoner wiring tests against a scripted fake Anthropic client.
-
-These verify the agent loop mechanics without network access: request shape
-(model, effort, refusal fallback, no sampling params), tool_use -> tool_result
-round trips, append-only transcripts with thinking blocks passed back
-unchanged, revision on grounding failure, reflection, budget enforcement, and
-that the input guard stops cross-tenant requests before any API call.
-They do NOT measure answer quality of the real model (see README).
-"""
+"""Claude reasoner loop tests against a scripted fake client."""
 
 from __future__ import annotations
 

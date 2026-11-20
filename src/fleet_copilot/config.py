@@ -1,10 +1,4 @@
-"""Central configuration: thresholds, model settings and runtime paths.
-
-Every threshold the copilot uses to call something "low", "constrained" or
-"end-of-life" lives here so that it is documented, overridable and cited in
-answers. None of these values come from the assessment brief; they are
-engineering defaults documented in docs/ASSUMPTIONS.md.
-"""
+"""Runtime settings and detection thresholds."""
 
 from __future__ import annotations
 
@@ -16,8 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT_ROOT / "data" / "device-telemetry-dataset.ndjson"
 DEFAULT_HOME = PROJECT_ROOT / "var"
 
-# 1 GB in this project = 1024**3 bytes, matching the dataset's own convention
-# (device_identity.total_memory "32 GB" == memory.ram_bytes 34359738368).
+# The dataset reports "32 GB" for 34359738368 bytes, so 1 GB = 1024**3 here.
 GB = 1024**3
 
 # Models that support the server-side refusal fallback parameter.
@@ -57,7 +50,7 @@ class Settings:
     model: str = "claude-opus-5-5"
     effort: str = "high"
     refusal_fallback: bool = True
-    gemini_model: str = "gemini-3.5-flash"
+    gemini_model: str = "gemini-3.5-flash-lite"
     gemini_thinking_level: str = "LOW"  # MINIMAL | LOW | MEDIUM | HIGH | none (omit)
     llm_timeout_s: float = 120.0  # per-request timeout for LLM calls
     llm_min_interval_s: float = 0.0  # pacing between LLM calls (useful on free-tier rate limits)

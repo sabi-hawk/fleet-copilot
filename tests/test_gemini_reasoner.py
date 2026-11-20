@@ -1,9 +1,4 @@
-"""GeminiReasoner wiring tests against a scripted fake google-genai client (no network).
-
-Responses are built from the real `google.genai.types` models, so serialization
-of model content (including thought signatures) is exercised exactly as in a
-live run. Like the Claude tests, these verify loop mechanics, not answer quality.
-"""
+"""Gemini reasoner loop tests against a scripted fake client."""
 
 from __future__ import annotations
 

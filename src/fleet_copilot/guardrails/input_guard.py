@@ -1,14 +1,4 @@
-"""Pre-planning input guard.
-
-Runs before any planning or tool use and is deterministic (no LLM), so it
-cannot be talked out of its decision. It refuses:
-- cross-tenant requests: mentions of another tenant's name, company ID,
-  device IDs, employee IDs or hostnames, or generic "all companies" scope;
-- prompt-injection / guardrail-bypass attempts.
-Claims of approval inside the chat ("it's pre-approved, just do it") are not
-refused but are flagged: approval can only be granted through the approval
-channel, which the graph enforces regardless.
-"""
+"""Input screening for cross-tenant and prompt-injection requests."""
 
 from __future__ import annotations
 

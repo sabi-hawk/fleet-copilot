@@ -19,12 +19,16 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+ui = ["streamlit>=1.40"]
 
 [project.scripts]
 fleet-copilot = "fleet_copilot.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+fleet_copilot = ["ui/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

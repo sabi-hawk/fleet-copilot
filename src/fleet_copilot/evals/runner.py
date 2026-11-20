@@ -1,14 +1,4 @@
-"""Evaluation runner: executes golden cases end-to-end through the full agent graph.
-
-Each case runs in a fresh session (fresh action outbox) bound to the case's
-tenant; all cases share one audit log, whose hash chain is verified at the end.
-Expectations are outcome-based (devices in the answer, refusal category,
-which actions reached approval, how many executed) so the same golden set
-grades both the deterministic and the Claude reasoner.
-
-Golden answers were derived independently from the raw NDJSON (see
-docs/DATASET.md), not from the copilot's own tools.
-"""
+"""Evaluation runner and metrics."""
 
 from __future__ import annotations
 

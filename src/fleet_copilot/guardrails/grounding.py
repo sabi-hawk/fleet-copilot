@@ -1,14 +1,4 @@
-"""Grounding verifier: checks a draft answer against the session's evidence ledger.
-
-Hard failures (the answer is revised, or replaced by an evidence-only answer):
-- a citation [E#] that does not exist in the ledger;
-- a device or employee ID that no evidence item covers (unsupported claim);
-- a device-ID-shaped token that is not a known device (fabricated entity);
-- any identifier or name belonging to another tenant (leak);
-- factual content (IDs, percentages, GB figures) with no citation at all.
-Soft check (reported as a metric, not a failure):
-- percentages / GB figures that do not appear in any cited evidence.
-"""
+"""Grounding checks for generated answers."""
 
 from __future__ import annotations
 
@@ -46,9 +36,7 @@ class GroundingReport:
 
 
 def repair_split_identifiers(text: str, identifiers: set[str]) -> tuple[str, list[str]]:
-    """Re-join known identifiers that a model broke with whitespace/newlines (e.g. '8NM\\n23J95R5I6').
-
-    Only exact, known IDs are repaired, so no other text can change. Returns (text, repaired_ids)."""
+    """Re-join known IDs split by whitespace (e.g. '8NM\\n23J95R5I6'). Returns (text, repaired_ids)."""
     repaired: list[str] = []
     for ident in sorted(identifiers, key=len, reverse=True):
         pattern = re.compile(r"(?<![A-Za-z0-9-])" + r"\s*".join(re.escape(ch) for ch in ident) + r"(?![A-Za-z0-9-])")
@@ -115,9 +103,7 @@ class GroundingVerifier:
             | {e for e in emps if e not in self.own_employees}
         )
 
-        # Soft numeric check on the narrative only: the system-generated action-status section carries
-        # user-supplied specs and policy thresholds, which are not telemetry claims. Magnitudes are compared
-        # because trends are written both as "-5.2 GB/day" and "falling 5.2 GB/day".
+        # Narrative only (the action-status section holds specs and thresholds); compare magnitudes for signed trends.
         narrative = text.split("\n---\nAction status", 1)[0]
         corpus_nums = [abs(float(x)) for x in _CORPUS_NUM_RE.findall(corpus)]
         nums = _NUMBER_RE.findall(narrative)

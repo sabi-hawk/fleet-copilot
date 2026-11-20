@@ -1,19 +1,4 @@
-"""The Fleet Copilot agent graph (LangGraph StateGraph).
-
-    START
-      -> guard_input        deterministic input guard (cross-tenant, injection)  --refused--> compose
-      -> plan               reasoner produces an explicit, audited plan
-      -> agent <-> tools    explicit agent loop: reasoner emits tool calls, tool node executes them
-                            (tenant-scoped, validated, evidence-registering); bounded by max_agent_iterations
-      -> reflect            plan-coverage check; may send the agent back once with a reflection note
-      -> policy_gate        authoritative re-evaluation of every proposal by the policy engine
-      -> human_approval     LangGraph interrupt(): pauses until an administrator approves/rejects
-      -> execute_actions    executes approved proposals only (policy re-checked at execution time)
-      -> compose            draft answer + system-generated action status section
-      -> verify             grounding verifier; on failure: one revision, then evidence-only fallback
-      -> finalize           audit + history
-    END
-"""
+"""LangGraph definition of the copilot agent."""
 
 from __future__ import annotations
 
@@ -118,8 +103,6 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
 
     def policy_engine(ledger: EvidenceLedger) -> ActionPolicyEngine:
         return ActionPolicyEngine(deps.view, ledger, s.thresholds, deps.actions, deps.guard.foreign_identifiers)
-
-    # ------------------------------------------------------------------ nodes
     def guard_input(state: AgentState) -> dict:
         d = deps.guard.check(state["question"])
         log("input_guard", {"turn": state["turn"], "question": state["question"], **d.to_dict()}, actor="guard")
@@ -301,8 +284,6 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
                        "proposals": [{"id": p["proposal_id"], "status": p["status"]} for p in state.get("proposals", [])]})
         hist = state.get("history", []) + [{"turn": state["turn"], "question": state["question"], "answer": state.get("answer") or ""}]
         return {"status": status, "history": hist[-10:]}
-
-    # ------------------------------------------------------------------ routing
     def after_guard(state: AgentState) -> str:
         return "plan" if (state.get("guard") or {}).get("allowed") else "compose"
 
@@ -310,8 +291,7 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
         return "tools" if state.get("pending_tool_calls") else "reflect"
 
     def after_reflect(state: AgentState) -> str:
-        # Back to the agent when reflection asked for more work, or when the loop ended without a draft
-        # (bounded: at max_agent_iterations the agent is forced to answer without tools).
+        # Bounded: at max_agent_iterations the agent must answer without tools.
         if state.get("draft") is None and state.get("iterations", 0) <= s.max_agent_iterations:
             return "agent"
         return "policy_gate" if state.get("proposals") else "compose"

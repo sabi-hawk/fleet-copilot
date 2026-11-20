@@ -1,10 +1,4 @@
-"""Deterministic insight & trend detectors over a tenant's telemetry time series.
-
-Each detector returns `Insight` objects carrying (1) the finding, (2) the
-supporting evidence as concrete snapshots, and (3) a brief explanation, which
-is the structure the assessment asks for. Detectors are pure functions of the
-`TenantView` and `Thresholds`, so their output is fully reproducible.
-"""
+"""Insight and trend detectors."""
 
 from __future__ import annotations
 
@@ -59,9 +53,6 @@ def _next_tier(gb: float, tiers: tuple[int, ...]) -> str | None:
         if t > gb + 0.5:
             return f"{t} GB" if t < 1024 else f"{t // 1024} TB"
     return None
-
-
-# --------------------------------------------------------------------------- battery
 def detect_battery_health(view: TenantView, th: Thresholds) -> list[Insight]:
     out: list[Insight] = []
     for did in view.device_ids():
@@ -133,9 +124,6 @@ def detect_battery_health(view: TenantView, th: Thresholds) -> list[Insight]:
             evidence=ev, recommended_actions=actions,
         ))
     return _sort(out)
-
-
-# --------------------------------------------------------------------------- memory
 def memory_profile(hist: list[Snapshot], th: Thresholds) -> dict[str, Any]:
     pts = [(s, s.mem_used_pct) for s in hist if s.mem_used_pct is not None]
     vals = [v for _, v in pts]
@@ -199,9 +187,6 @@ def detect_memory_pressure(view: TenantView, th: Thresholds) -> list[Insight]:
             evidence=ev, recommended_actions=actions,
         ))
     return _sort(out)
-
-
-# --------------------------------------------------------------------------- storage
 def storage_profile(hist: list[Snapshot], th: Thresholds) -> dict[str, Any] | None:
     pts = [(s, s.primary_disk) for s in hist if s.primary_disk is not None]
     if not pts:
@@ -284,9 +269,6 @@ def detect_storage_pressure(view: TenantView, th: Thresholds) -> list[Insight]:
             evidence=ev, recommended_actions=actions,
         ))
     return _sort(out)
-
-
-# --------------------------------------------------------------------------- compliance
 def _status_runs(hist: list[Snapshot], check_id: str) -> list[tuple[Snapshot, str]]:
     return [(s, c.status) for s in hist if (c := s.compliance_status(check_id)) is not None]
 
@@ -390,9 +372,6 @@ def detect_compliance_drift(view: TenantView, th: Thresholds, check_id: str | No
                         snapshots=last_day_snaps, fields={"daily_failing_counts": series}, period=[dates[0], dates[-1]])],
                 ))
     return _sort(out)
-
-
-# --------------------------------------------------------------------------- software
 def detect_software_changes(view: TenantView, th: Thresholds) -> list[Insight]:
     out: list[Insight] = []
     devices = view.device_ids()
@@ -441,9 +420,6 @@ def detect_software_changes(view: TenantView, th: Thresholds) -> list[Insight]:
                 evidence=ev, recommended_actions=actions,
             ))
     return _sort(out)
-
-
-# --------------------------------------------------------------------------- telemetry gaps
 def detect_telemetry_gaps(view: TenantView, th: Thresholds) -> list[Insight]:
     out: list[Insight] = []
     for did in view.device_ids():

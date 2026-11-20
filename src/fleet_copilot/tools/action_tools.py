@@ -1,11 +1,4 @@
-"""Action tools (state-changing in intent, proposal-only in effect).
-
-The four signatures follow the assessment brief verbatim. Calling one of these
-tools does NOT change anything: it records a proposal, runs the policy engine
-(which recomputes the evidence independently and attaches citations) and tells
-the model the outcome. Execution happens only in the graph's execute node,
-after the policy gate AND an explicit human approval.
-"""
+"""Action tools. They only create proposals; execution needs policy approval and a human decision."""
 
 from __future__ import annotations
 
@@ -71,8 +64,7 @@ def _propose(ctx: ToolContext, tool: str, args: dict) -> ToolOutput:
 
 
 def _register_target(ctx: ToolContext, tool: str, args: dict) -> list[str]:
-    """Identity evidence for the action's target, so the proposal itself can be referenced in answers.
-    It establishes only that the target exists in this tenant; it never justifies an action."""
+    """Evidence that the target exists in this tenant. It never justifies an action on its own."""
     v = ctx.view
     if args.get("device_id") and v.has_device(args["device_id"]):
         s = v.latest(args["device_id"])

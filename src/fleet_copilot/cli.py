@@ -1,13 +1,4 @@
-"""Command-line interface for Fleet Copilot.
-
-    fleet-copilot tenants
-    fleet-copilot chat     --tenant acme-001 [--reasoner auto|claude|rule] [--approver alice@acme]
-    fleet-copilot ask      --tenant acme-001 "Which devices are low on disk space?" [--approve interactive|all|none]
-    fleet-copilot insights --tenant acme-001 [--category battery_health ...]
-    fleet-copilot tools
-    fleet-copilot audit verify | audit tail [-n 20]
-    fleet-copilot eval     [--reasoner rule|claude] [--out evals/reports/latest]
-"""
+"""Command-line interface."""
 
 from __future__ import annotations
 
@@ -183,6 +174,27 @@ def cmd_audit(args, settings):
         print(json.dumps(rec, default=str)[:400])
 
 
+def cmd_ui(args, settings):
+    import subprocess
+
+    try:
+        import streamlit  # noqa: F401
+    except ImportError:
+        print('error: the UI needs Streamlit. Install it with: pip install -e ".[ui]"', file=sys.stderr)
+        sys.exit(2)
+    import threading
+    import webbrowser
+
+    app = Path(__file__).parent / "ui" / "app.py"
+    url = f"http://localhost:{args.port}"
+    cmd = [sys.executable, "-m", "streamlit", "run", str(app), "--server.port", str(args.port),
+           "--server.headless", "true", "--browser.gatherUsageStats", "false"]
+    print(f"Fleet Copilot UI: {url}  (Ctrl+C to stop)")
+    if not args.no_browser:
+        threading.Timer(3.0, webbrowser.open, args=(url,)).start()
+    sys.exit(subprocess.call(cmd))
+
+
 def cmd_eval(args, settings):
     from fleet_copilot.evals.runner import main as eval_main
 
@@ -222,6 +234,10 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(fn=cmd_insights)
     sub.add_parser("tools", help="Print the tool catalog").set_defaults(fn=cmd_tools)
+    sp = sub.add_parser("ui", help="Launch the web UI (Streamlit)")
+    sp.add_argument("--port", type=int, default=8501)
+    sp.add_argument("--no-browser", action="store_true", help="Do not open a browser window")
+    sp.set_defaults(fn=cmd_ui)
     sp = sub.add_parser("audit", help="Verify or tail the audit log")
     sp.add_argument("action", choices=["verify", "tail"])
     sp.add_argument("-n", type=int, default=20)

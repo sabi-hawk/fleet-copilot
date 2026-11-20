@@ -1,10 +1,4 @@
-"""Platform-aware OS version parsing.
-
-The dataset mixes macOS versions ("14.5", "15.4") with Windows releases
-("10 22H2", "11 23H2"). A naive string comparison would rank "10 22H2" above
-"15.4", so versions are parsed into comparable tuples per OS family and
-comparisons across families are refused.
-"""
+"""OS version parsing and comparison."""
 
 from __future__ import annotations
 
