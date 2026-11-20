@@ -64,8 +64,8 @@ class GeminiReasoner:
         if client is None:
             from google import genai
 
-            key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-            client = genai.Client(api_key=key)
+            key = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
+            client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=int(settings.llm_timeout_s * 1000)))
         self.client = client
         self.settings = settings
         self.model = settings.gemini_model
@@ -97,6 +97,9 @@ class GeminiReasoner:
         if json_schema:
             cfg["response_mime_type"] = "application/json"
             cfg["response_json_schema"] = json_schema
+        level = (self.settings.gemini_thinking_level or "").upper()
+        if level and level not in ("NONE", "DEFAULT"):
+            cfg["thinking_config"] = t.ThinkingConfig(thinking_level=level)
         config = t.GenerateContentConfig(**cfg)
         from google.genai import errors
 
@@ -113,6 +116,11 @@ class GeminiReasoner:
                 if exc.code == 429 and re.search(r"per ?day|PerDay|daily", msg, re.IGNORECASE):
                     raise QuotaExhausted(f"Gemini daily quota exhausted for {self.model}: {msg[:300]}") from exc
                 if exc.code not in RETRYABLE or attempt >= 5:
+                    raise
+                time.sleep(_retry_delay(exc, attempt))
+                attempt += 1
+            except Exception as exc:  # network timeouts (httpx / httpx2) are retried a few times
+                if "timeout" not in type(exc).__name__.lower() or attempt >= 2:
                     raise
                 time.sleep(_retry_delay(exc, attempt))
                 attempt += 1

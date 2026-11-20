@@ -79,8 +79,9 @@ def test_tool_loop_config_and_transcript(make_session, settings):
     assert "8NM23J95R5I6" in r.answer and "MT7PJB7N5LRE" in r.answer
     for req in fake.requests:
         cfg = req["config"]
-        assert req["model"] == "gemini-flash-latest"
+        assert req["model"] == settings.gemini_model
         assert cfg.temperature == 0.0 and cfg.seed == 7 and cfg.automatic_function_calling.disable is True
+        assert cfg.thinking_config.thinking_level == "LOW"
     first, second = fake.agent_requests()
     assert first["config"].tool_config.function_calling_config.mode == "AUTO"
     assert len(first["config"].tools[0].function_declarations) == 18

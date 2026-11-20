@@ -17,6 +17,7 @@ import json
 import re
 import statistics
 import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -308,7 +309,7 @@ def write_report(out_dir: Path, reasoner: str, summary: dict[str, Any], results:
 
 def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_dir: str | Path | None = None,
               settings: Settings | None = None, only: list[str] | None = None, repeats: int | None = None,
-              client: Any = None) -> tuple[dict[str, Any], list[dict[str, Any]], Path]:
+              client: Any = None, workers: int = 1, progress: bool = False) -> tuple[dict[str, Any], list[dict[str, Any]], Path]:
     settings = settings or Settings.from_env()
     cases = load_cases(Path(suite_dir) if suite_dir else DEFAULT_SUITE)
     cases = [c for c in cases if reasoner in c.get("reasoners", ["rule", "claude", "gemini"])]
@@ -326,13 +327,14 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
         run_dir = out / f"run{rep + 1}"
         s = replace(settings, home=run_dir)
         audit = AuditLog(audit_path)
-        results = []
-        for case in cases:
+        def one(case: dict[str, Any]) -> dict[str, Any]:
             cr = CaseRun(case, store, s, audit, run_dir, reasoner, client)
             run = cr.run()
             ev = evaluate_case(case, run, store, audit, cr.actions)
             res = run["result"]
-            results.append({
+            if progress:
+                print(f"  [{'PASS' if ev['passed'] else 'FAIL'}] {case['id']} ({run['elapsed_s']:.1f}s)", flush=True)
+            return {
                 "id": case["id"], "category": case["category"], "tenant": case["tenant"], "file": case["_file"],
                 "question": case.get("question") or [t["question"] for t in case.get("turns", [])],
                 "expected_status": case.get("expect", {}).get("status", "answered"),
@@ -343,7 +345,13 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
                               "policy_reasons": p["policy"]["reasons"]} for p in (res.proposals if res else [])],
                 "answer_sha256": hashlib.sha256((res.answer or "").encode()).hexdigest() if res else None,
                 "error": run["error"],
-            })
+            }
+
+        if workers > 1:  # cases are independent sessions; the audit log is lock-protected
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                results = list(pool.map(one, cases))  # map preserves case order
+        else:
+            results = [one(c) for c in cases]
         all_runs.append(results)
     determinism = None
     if repeats > 1:
@@ -357,8 +365,8 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
 
 
 def main(reasoner: str = "rule", suite_dir: str | None = None, out_dir: str | None = None, settings: Settings | None = None,
-         only: list[str] | None = None, min_pass_rate: float = 0.9) -> int:
-    summary, results, out = run_suite(reasoner, suite_dir, out_dir, settings, only)
+         only: list[str] | None = None, min_pass_rate: float = 0.9, workers: int = 1) -> int:
+    summary, results, out = run_suite(reasoner, suite_dir, out_dir, settings, only, workers=workers, progress=reasoner != "rule")
     print(f"\nFleet Copilot eval ({reasoner}): {summary['passed']}/{summary['cases']} passed ({summary['pass_rate']:.1%})")
     for k, v in summary["by_category"].items():
         print(f"  {k:22s} {v['passed']:3d}/{v['total']:<3d} {v['pass_rate']:.1%}")

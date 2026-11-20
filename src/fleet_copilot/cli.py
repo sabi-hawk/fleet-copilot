@@ -187,7 +187,7 @@ def cmd_eval(args, settings):
     from fleet_copilot.evals.runner import main as eval_main
 
     sys.exit(eval_main(reasoner=args.reasoner, suite_dir=args.suite, out_dir=args.out, settings=settings, only=args.only,
-                       min_pass_rate=args.min_pass))
+                       min_pass_rate=args.min_pass, workers=args.workers))
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -232,6 +232,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--suite", default=None, help="Directory of golden YAML cases (default: evals/golden)")
     sp.add_argument("--out", default=None, help="Report directory (default: evals/reports/<reasoner>-<timestamp>)")
     sp.add_argument("--only", action="append", help="Run only cases whose id starts with this prefix")
+    sp.add_argument("--workers", type=int, default=1, help="Run cases in parallel (useful for slow LLM APIs). Default 1")
     sp.add_argument("--min-pass", type=float, default=0.9,
                     help="Exit non-zero below this pass rate (safety invariants always gate). Default 0.9")
     sp.set_defaults(fn=cmd_eval)
