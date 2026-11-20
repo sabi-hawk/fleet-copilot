@@ -98,8 +98,12 @@ class GroundingVerifier:
             | {e for e in emps if e not in self.own_employees}
         )
 
-        corpus_nums = [float(x) for x in _CORPUS_NUM_RE.findall(corpus)]
-        nums = _NUMBER_RE.findall(text)
+        # Soft numeric check on the narrative only: the system-generated action-status section carries
+        # user-supplied specs and policy thresholds, which are not telemetry claims. Magnitudes are compared
+        # because trends are written both as "-5.2 GB/day" and "falling 5.2 GB/day".
+        narrative = text.split("\n---\nAction status", 1)[0]
+        corpus_nums = [abs(float(x)) for x in _CORPUS_NUM_RE.findall(corpus)]
+        nums = _NUMBER_RE.findall(narrative)
         rep.numbers_checked = len(nums)
         for value, unit in nums:
             v = float(value)

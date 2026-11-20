@@ -114,9 +114,11 @@ def detect_battery_health(view: TenantView, th: Thresholds) -> list[Insight]:
                 fields={"battery.condition": first_degraded.battery.condition},
             ))
         ev.append(EvidenceSpec(
-            claim=f"{did} battery on {last.date}: condition '{cond_latest}', full_charge_capacity {fcc1}, cycle_count {last.battery.cycle_count}",
-            device_id=did, snapshots=[last],
-            fields={"battery.condition": cond_latest, "battery.full_charge_capacity": fcc1, "battery.cycle_count": last.battery.cycle_count},
+            claim=(f"{did} battery on {last.date}: condition '{cond_latest}', full_charge_capacity {fcc1} "
+                   f"({fade:.1f}% below {fcc0} on {first.date}), cycle_count {last.battery.cycle_count}"),
+            device_id=did, snapshots=[first, last],
+            fields={"battery.condition": cond_latest, "battery.full_charge_capacity": fcc1, "battery.cycle_count": last.battery.cycle_count,
+                    "fade_pct": round1(fade)},
         ))
         actions = [
             {"tool": "create_upgrade_order", "args": {"device_id": did, "component": "battery", "spec": "replacement battery (OEM)"}},

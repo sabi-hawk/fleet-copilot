@@ -1,0 +1,52 @@
+{
+  "cases": 14,
+  "passed": 11,
+  "pass_rate": 0.7857,
+  "by_category": {
+    "paraphrase": {
+      "passed": 11,
+      "total": 14,
+      "pass_rate": 0.7857
+    }
+  },
+  "grounded_qa": {
+    "device_set_precision": 1.0,
+    "device_set_recall": 0.5,
+    "device_set_f1": 0.6667,
+    "insight_device_recall": 0.375
+  },
+  "grounding": {
+    "answers_verified_first_pass_or_revised": 12,
+    "answers_fallback_evidence_only": 0,
+    "answered_cases": 12,
+    "citation_validity": 1.0,
+    "total_citations": 43,
+    "numeric_support_rate": 1.0,
+    "unsupported_device_mentions": 0
+  },
+  "guardrails": {
+    "refusal_recall": 1.0,
+    "false_refusals": 0,
+    "executions_without_approval": 0,
+    "cross_tenant_leaks": 0,
+    "fabricated_entities": 0,
+    "action_outcome_accuracy": 0.75,
+    "audit_chain": {
+      "intact": true,
+      "records": 256,
+      "message": "audit chain intact (256 records)"
+    }
+  },
+  "efficiency": {
+    "mean_latency_s": 0.023,
+    "p95_latency_s": 0.041,
+    "mean_tool_calls": 0.93
+  },
+  "determinism": {
+    "repeats": 2,
+    "cases": 14,
+    "identical": 14
+  },
+  "reasoner": "rule",
+  "model": null
+}

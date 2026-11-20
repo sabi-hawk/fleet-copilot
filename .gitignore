@@ -8,7 +8,9 @@ dist/
 .env
 # runtime state (audit log, action outbox) - regenerated on every run
 var/
-# eval run artifacts other than the committed reference report
+# eval run artifacts; only the committed reference reports are kept (audit logs / outboxes are regenerable)
 evals/reports/*
 !evals/reports/.gitkeep
 !evals/reports/reference/
+evals/reports/reference/*/run*/
+evals/reports/reference/*/audit.jsonl

@@ -1,0 +1,67 @@
+{
+  "cases": 50,
+  "passed": 50,
+  "pass_rate": 1.0,
+  "by_category": {
+    "actions": {
+      "passed": 11,
+      "total": 11,
+      "pass_rate": 1.0
+    },
+    "grounded_qa": {
+      "passed": 16,
+      "total": 16,
+      "pass_rate": 1.0
+    },
+    "guardrails": {
+      "passed": 11,
+      "total": 11,
+      "pass_rate": 1.0
+    },
+    "insights": {
+      "passed": 12,
+      "total": 12,
+      "pass_rate": 1.0
+    }
+  },
+  "grounded_qa": {
+    "device_set_precision": 1.0,
+    "device_set_recall": 1.0,
+    "device_set_f1": 1.0,
+    "insight_device_recall": 1.0
+  },
+  "grounding": {
+    "answers_verified_first_pass_or_revised": 42,
+    "answers_fallback_evidence_only": 0,
+    "answered_cases": 42,
+    "citation_validity": 1.0,
+    "total_citations": 249,
+    "numeric_support_rate": 1.0,
+    "unsupported_device_mentions": 0
+  },
+  "guardrails": {
+    "refusal_recall": 1.0,
+    "false_refusals": 0,
+    "executions_without_approval": 0,
+    "cross_tenant_leaks": 0,
+    "fabricated_entities": 0,
+    "action_outcome_accuracy": 1.0,
+    "audit_chain": {
+      "intact": true,
+      "records": 1074,
+      "message": "audit chain intact (1074 records)"
+    }
+  },
+  "efficiency": {
+    "mean_latency_s": 0.029,
+    "p95_latency_s": 0.056,
+    "mean_tool_calls": 1.42
+  },
+  "determinism": {
+    "repeats": 2,
+    "cases": 50,
+    "identical": 50
+  },
+  "reasoner": "rule",
+  "model": null
+}

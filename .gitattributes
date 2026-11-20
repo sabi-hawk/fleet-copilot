@@ -1,0 +1,4 @@
+# Keep the dataset byte-exact so evidence line numbers always match the raw file.
+data/*.ndjson -text
+* text=auto eol=lf
+*.bat text eol=crlf

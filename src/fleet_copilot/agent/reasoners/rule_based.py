@@ -280,7 +280,8 @@ class RuleBasedReasoner:
             calls = []
             for dev in targets:
                 found = [i for i in insights if i["device_id"] == dev]
-                reason = "; ".join(i["title"] + ": " + i["finding"].split(": ", 1)[-1] for i in found) or f"Administrator request: {d['question']}"
+                reason = "; ".join(i["title"] + ": " + i["finding"].split(": ", 1)[-1].rstrip(".") for i in found) \
+                    or f"Administrator request: {d['question']}"
                 calls.append({"name": "flag_device_for_replacement", "args": {"device_id": dev, "reason": reason[:500]}})
             return calls
         if kind == "upgrade":
@@ -431,7 +432,10 @@ class RuleBasedReasoner:
             for r in ok:
                 if r.get("kind") == "read" and r["evidence_ids"]:
                     ev_lines.append(f"- {r['summary']} [{', '.join(r['evidence_ids'][:4])}]")
+            focus = set(plan.get("entities", {}).get("devices") or [])
             for i in self._insights(state):
+                if focus and i["device_id"] not in focus:
+                    continue
                 ev_lines.append(f"- {i['title']}: {i['finding']} [{', '.join(i['evidence_ids'])}]")
             props = state.get("proposals", [])
             lines.insert(0, f"I evaluated the request against the telemetry and prepared {len(props)} action proposal(s); "
