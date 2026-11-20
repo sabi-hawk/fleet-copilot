@@ -1,4 +1,4 @@
-from fleet_copilot.guardrails.grounding import GroundingReport, GroundingVerifier, extract_citations
+from fleet_copilot.guardrails.grounding import GroundingReport, GroundingVerifier, extract_citations, repair_split_identifiers
 from fleet_copilot.guardrails.input_guard import GuardDecision, InputGuard
 from fleet_copilot.guardrails.policy import ACTION_TOOLS, ActionPolicyEngine, PolicyDecision
 
@@ -11,4 +11,5 @@ __all__ = [
     "InputGuard",
     "PolicyDecision",
     "extract_citations",
+    "repair_split_identifiers",
 ]

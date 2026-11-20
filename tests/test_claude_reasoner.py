@@ -146,7 +146,7 @@ def test_reflection_sends_agent_back_once(make_session, settings):
                        lambda kw: resp([text(f"Done [{payloads(kw)[0]['data']['devices'][0]['evidence_id']}] (MT7PJB7N5LRE fails screen_lock).")])])
     s = session(make_session, settings, fake)
     r = s.ask("Low disk devices and their screen lock status?")
-    assert any("Reflection check" in str(m.get("content")) for req in fake.agent_requests() for m in req["messages"][-1:])
+    assert any("reflection check" in str(m.get("content")).lower() for req in fake.agent_requests() for m in req["messages"][-1:])
     assert [t["name"] for t in r.tool_calls] == ["find_devices", "get_compliance_status"]
     assert r.grounding_status == "passed"
 

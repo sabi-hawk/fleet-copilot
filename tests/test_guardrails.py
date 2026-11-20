@@ -74,6 +74,18 @@ def test_grounding_tracks_unsupported_numbers_softly(store, ledger_with):
     assert rep.passed and rep.unsupported_numbers == ["7.5%"]
 
 
+def test_split_identifiers_are_rejoined_only_when_known():
+    from fleet_copilot.guardrails import repair_split_identifiers
+
+    ids = {"8NM23J95R5I6", "emp-acme-1005"}
+    text = "* **8NM\n23J95R5I6** (Assigned to emp-acme-\n1005) [E3]; also 8NM 23 elsewhere and ZZZ\n999"
+    fixed, repaired = repair_split_identifiers(text, ids)
+    assert "**8NM23J95R5I6**" in fixed and "emp-acme-1005" in fixed
+    assert repaired == ["8NM23J95R5I6", "emp-acme-1005"]
+    assert "8NM 23 elsewhere" in fixed and "ZZZ\n999" in fixed          # nothing else is touched
+    assert repair_split_identifiers("8NM23J95R5I6 ok", ids) == ("8NM23J95R5I6 ok", [])
+
+
 def test_not_found_ids_may_be_echoed(store):
     rep = GroundingVerifier(store, "acme-001").verify("Device ZZZZ99999999 was not found.", EvidenceLedger(),
                                                        acknowledged_unknown={"ZZZZ99999999"})

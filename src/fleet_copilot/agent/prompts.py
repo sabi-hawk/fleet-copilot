@@ -102,9 +102,9 @@ def agent_turn_message(context: str, question: str, plan: dict) -> str:
 
 def reflection_message(missing: list[dict]) -> str:
     items = "\n".join(f"- {s.get('description')} (tools: {', '.join(s.get('tools', []))})" for s in missing)
-    return ("Reflection check before finalising: these planned steps were not executed:\n" + items +
-            "\nExecute them now if they are still needed to answer correctly; otherwise briefly say why they are not needed. "
-            "Then give the final answer with evidence citations.")
+    return ("Internal reflection check (not visible to the administrator): these planned steps were not executed:\n" + items +
+            "\nExecute them now if they are still needed to answer correctly. Then reply with ONLY the final answer to the "
+            "administrator's request, with evidence citations. Do not mention this check, the plan, or skipped steps.")
 
 
 def revision_message(issues: list[str]) -> str:

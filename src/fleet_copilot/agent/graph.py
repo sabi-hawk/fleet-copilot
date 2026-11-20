@@ -32,7 +32,7 @@ from fleet_copilot.audit import AuditLog
 from fleet_copilot.config import Settings
 from fleet_copilot.data.store import TelemetryStore, TenantView
 from fleet_copilot.evidence import EvidenceLedger
-from fleet_copilot.guardrails import ActionPolicyEngine, GroundingVerifier, InputGuard
+from fleet_copilot.guardrails import ActionPolicyEngine, GroundingVerifier, InputGuard, repair_split_identifiers
 from fleet_copilot.tools.base import ToolContext, ToolRegistry
 
 APPROVE_WORDS = {"approve", "approved", "yes", "y"}
@@ -262,6 +262,10 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
         if not guard.get("allowed", True):
             return {"answer": f"Request refused ({guard.get('category')}): {guard.get('reason')}"}
         draft = state.get("draft") or ""
+        ids = set(deps.view.device_ids()) | set(deps.view.employees())
+        draft, repaired = repair_split_identifiers(draft, ids)
+        if repaired:
+            log("output_normalized", {"turn": state["turn"], "rejoined_identifiers": repaired}, actor="composer")
         prefix = "".join(f"Note: {w}\n\n" for w in guard.get("warnings", []))
         return {"answer": prefix + draft + action_status_section(state.get("proposals", []))}
 

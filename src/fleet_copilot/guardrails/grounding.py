@@ -45,6 +45,23 @@ class GroundingReport:
         return asdict(self)
 
 
+def repair_split_identifiers(text: str, identifiers: set[str]) -> tuple[str, list[str]]:
+    """Re-join known identifiers that a model broke with whitespace/newlines (e.g. '8NM\\n23J95R5I6').
+
+    Only exact, known IDs are repaired, so no other text can change. Returns (text, repaired_ids)."""
+    repaired: list[str] = []
+    for ident in sorted(identifiers, key=len, reverse=True):
+        pattern = re.compile(r"(?<![A-Za-z0-9-])" + r"\s*".join(re.escape(ch) for ch in ident) + r"(?![A-Za-z0-9-])")
+
+        def _fix(m: re.Match) -> str:
+            if m.group(0) != ident:
+                repaired.append(ident)
+            return ident
+
+        text = pattern.sub(_fix, text)
+    return text, sorted(set(repaired))
+
+
 def extract_citations(text: str) -> list[str]:
     out: list[str] = []
     for m in _BRACKET_RE.finditer(text or ""):
