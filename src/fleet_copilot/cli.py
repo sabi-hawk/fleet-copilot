@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-from fleet_copilot.config import Settings, llm_credentials_available
+from fleet_copilot.config import Settings, gemini_credentials_available, llm_credentials_available
 
 
 def _utf8_stdout() -> None:
@@ -48,9 +48,12 @@ def _session(args, settings: Settings):
     if args.reasoner == "claude" and not llm_credentials_available():
         print("error: --reasoner claude needs ANTHROPIC_API_KEY (or ANTHROPIC_AUTH_TOKEN). Use --reasoner rule for offline mode.", file=sys.stderr)
         sys.exit(2)
+    if args.reasoner == "gemini" and not gemini_credentials_available():
+        print("error: --reasoner gemini needs GEMINI_API_KEY (put it in .env). Use --reasoner rule for offline mode.", file=sys.stderr)
+        sys.exit(2)
     reasoner = make_reasoner(args.reasoner, settings)
     if args.reasoner == "auto" and reasoner.name == "rule_based":
-        print("[info] No Anthropic credentials found: using the deterministic offline reasoner (--reasoner rule).", file=sys.stderr)
+        print("[info] No LLM credentials found (ANTHROPIC_API_KEY / GEMINI_API_KEY): using the deterministic offline reasoner.", file=sys.stderr)
     return CopilotSession(_store(settings), args.tenant, settings=settings, reasoner=reasoner, actor=args.approver or "it-admin")
 
 
@@ -196,8 +199,8 @@ def main(argv: list[str] | None = None) -> None:
 
     def session_args(sp):
         sp.add_argument("--tenant", required=True, help="Tenant (company_id) this session is bound to, e.g. acme-001")
-        sp.add_argument("--reasoner", default="auto", choices=["auto", "claude", "rule"],
-                        help="auto = Claude if ANTHROPIC_API_KEY is set, else the deterministic offline reasoner")
+        sp.add_argument("--reasoner", default="auto", choices=["auto", "claude", "gemini", "rule"],
+                        help="auto = Claude if ANTHROPIC_API_KEY is set, else Gemini if GEMINI_API_KEY is set, else the offline reasoner")
         sp.add_argument("--approver", default=None, help="Approver identity recorded in the audit log")
         sp.add_argument("--approve", default="interactive", choices=["interactive", "all", "none"],
                         help="How to answer approval requests (default: ask interactively)")
@@ -225,7 +228,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--path", default=None)
     sp.set_defaults(fn=cmd_audit)
     sp = sub.add_parser("eval", help="Run the evaluation suite")
-    sp.add_argument("--reasoner", default="rule", choices=["rule", "claude"])
+    sp.add_argument("--reasoner", default="rule", choices=["rule", "claude", "gemini"])
     sp.add_argument("--suite", default=None, help="Directory of golden YAML cases (default: evals/golden)")
     sp.add_argument("--out", default=None, help="Report directory (default: evals/reports/<reasoner>-<timestamp>)")
     sp.add_argument("--only", action="append", help="Run only cases whose id starts with this prefix")

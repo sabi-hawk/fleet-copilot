@@ -57,6 +57,8 @@ class Settings:
     model: str = "claude-opus-5-5"
     effort: str = "high"
     refusal_fallback: bool = True
+    gemini_model: str = "gemini-flash-latest"
+    llm_min_interval_s: float = 0.0  # pacing between LLM calls (useful on free-tier rate limits)
     max_agent_iterations: int = 10
     max_reflections: int = 1
     max_revisions: int = 1
@@ -84,9 +86,15 @@ class Settings:
             model=os.environ.get("FLEET_COPILOT_MODEL", base.model),
             effort=os.environ.get("FLEET_COPILOT_EFFORT", base.effort),
             refusal_fallback=os.environ.get("FLEET_COPILOT_REFUSAL_FALLBACK", "on").lower() not in {"0", "off", "false", "no"},
+            gemini_model=os.environ.get("FLEET_COPILOT_GEMINI_MODEL", base.gemini_model),
+            llm_min_interval_s=float(os.environ.get("FLEET_COPILOT_LLM_MIN_INTERVAL", base.llm_min_interval_s)),
         )
 
 
 def llm_credentials_available() -> bool:
     """True when the Anthropic SDK can find credentials in the environment."""
     return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+
+
+def gemini_credentials_available() -> bool:
+    return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))

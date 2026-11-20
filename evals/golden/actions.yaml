@@ -114,11 +114,11 @@
     proposals_blocked: [{tool: open_remediation_ticket, device_id: 9MXJVZ1I0DKA}]
     executed_count: 5
 
-# Follow-up reference resolution needs conversational reasoning: Claude reasoner only.
+# Follow-up reference resolution needs conversational reasoning: LLM reasoners only.
 - id: act-multiturn-notify-low-disk-owners
   category: actions
   tenant: acme-001
-  reasoners: [claude]
+  reasoners: [claude, gemini]
   turns:
     - question: Which devices are low on disk space?
     - question: Notify the employees who use those devices to free up space.

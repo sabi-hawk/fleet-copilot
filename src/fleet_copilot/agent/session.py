@@ -20,7 +20,7 @@ from fleet_copilot.agent.graph import AgentDeps, build_graph
 from fleet_copilot.agent.reasoners import ClaudeReasoner, RuleBasedReasoner
 from fleet_copilot.agent.state import TURN_RESET
 from fleet_copilot.audit import AuditLog
-from fleet_copilot.config import Settings, llm_credentials_available
+from fleet_copilot.config import Settings, gemini_credentials_available, llm_credentials_available
 from fleet_copilot.data.store import TelemetryStore
 from fleet_copilot.evidence import EvidenceLedger
 from fleet_copilot.guardrails import GroundingVerifier, InputGuard
@@ -50,13 +50,18 @@ class TurnResult:
 
 
 def make_reasoner(kind: str, settings: Settings, client: Any | None = None):
+    """auto = Claude if Anthropic credentials exist, else Gemini if a Gemini key exists, else the offline reasoner."""
     if kind == "auto":
-        kind = "claude" if (client is not None or llm_credentials_available()) else "rule"
+        kind = "claude" if llm_credentials_available() else ("gemini" if gemini_credentials_available() else "rule")
     if kind in ("claude", "llm"):
         return ClaudeReasoner(settings, client=client)
+    if kind == "gemini":
+        from fleet_copilot.agent.reasoners.gemini import GeminiReasoner
+
+        return GeminiReasoner(settings, client=client)
     if kind in ("rule", "rule_based", "offline"):
         return RuleBasedReasoner()
-    raise ValueError(f"Unknown reasoner '{kind}' (use auto, claude or rule)")
+    raise ValueError(f"Unknown reasoner '{kind}' (use auto, claude, gemini or rule)")
 
 
 class CopilotSession:
@@ -96,7 +101,8 @@ class CopilotSession:
         self._config = {"configurable": {"thread_id": self.session_id}, "recursion_limit": 100}
         self.turn = 0
         self.audit.record("session_start", tenant_id=tenant_id, session_id=self.session_id, actor=actor,
-                          data={"reasoner": self.reasoner.name, "model": self.settings.model if self.reasoner.name == "claude" else None,
+                          data={"reasoner": self.reasoner.name,
+                                "model": {"claude": self.settings.model, "gemini": self.settings.gemini_model}.get(self.reasoner.name),
                                 "dataset": str(self.settings.dataset_path)})
 
     # ------------------------------------------------------------------ public API

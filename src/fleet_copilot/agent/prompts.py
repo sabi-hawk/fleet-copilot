@@ -42,6 +42,50 @@ Rules:
 - Never plan to access another organisation's data."""
 
 
+PLAN_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "intent": {"type": "string", "enum": ["question", "insight", "action", "out_of_scope", "clarification"]},
+        "goal": {"type": "string"},
+        "steps": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"description": {"type": "string"}, "tools": {"type": "array", "items": {"type": "string"}}},
+                "required": ["description", "tools"],
+                "additionalProperties": False,
+            },
+        },
+        "needs_actions": {"type": "boolean"},
+        "assumptions": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["intent", "goal", "steps", "needs_actions", "assumptions"],
+    "additionalProperties": False,
+}
+
+
+def planner_message(state: dict, rctx) -> tuple[str, str]:
+    """Returns (turn context line, planner user message). Shared by every LLM reasoner."""
+    v = rctx.view
+    ctxline = turn_context(v.display_name, v.tenant_id, v.window_label, v.as_of, len(v.device_ids()))
+    catalog = "\n".join(f"- {s.name} [{s.kind}]: {s.description}" for s in rctx.registry.specs)
+    recent = state.get("history", [])[-3:]
+    hist = "\n".join(f"- Q: {h['question']}\n  A: {h['answer'][:400]}" for h in recent)
+    msg = (f"{ctxline}\n\nTool catalog:\n{catalog}\n\n"
+           + (f"Recent conversation (for follow-up references):\n{hist}\n\n" if hist else "")
+           + f"Request: {state['question']}\n\nReturn the plan as JSON.")
+    return ctxline, msg
+
+
+def normalize_plan(plan: dict, question: str, known_tools: set[str], reasoner: str) -> dict:
+    for step in plan.get("steps", []):
+        step["tools"] = [t for t in step.get("tools", []) if t in known_tools]
+    plan.setdefault("goal", question)
+    plan.setdefault("assumptions", [])
+    plan["reasoner"] = reasoner
+    return plan
+
+
 def turn_context(org: str, tenant_id: str, window: str, as_of: str, devices: int) -> str:
     return (f"Organization: {org} (tenant {tenant_id}). Telemetry window: {window}; latest snapshot {as_of}; "
             f"{devices} devices.")

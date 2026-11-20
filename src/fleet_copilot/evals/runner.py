@@ -273,7 +273,8 @@ def write_report(out_dir: Path, reasoner: str, summary: dict[str, Any], results:
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     (out_dir / "cases.json").write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
     s = summary
-    lines = [f"# Fleet Copilot evaluation report ({reasoner} reasoner)", "",
+    model = summary.get("model")
+    lines = [f"# Fleet Copilot evaluation report ({reasoner} reasoner{', model ' + model if model else ''})", "",
              f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}. **{s['passed']}/{s['cases']} cases passed "
              f"({s['pass_rate']:.1%}).**", "", "## By category", "", "| Category | Passed | Total | Pass rate |", "|---|---|---|---|"]
     for k, v in s["by_category"].items():
@@ -310,7 +311,7 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
               client: Any = None) -> tuple[dict[str, Any], list[dict[str, Any]], Path]:
     settings = settings or Settings.from_env()
     cases = load_cases(Path(suite_dir) if suite_dir else DEFAULT_SUITE)
-    cases = [c for c in cases if reasoner in c.get("reasoners", ["rule", "claude"])]
+    cases = [c for c in cases if reasoner in c.get("reasoners", ["rule", "claude", "gemini"])]
     if only:
         cases = [c for c in cases if any(c["id"].startswith(p) for p in only)]
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
@@ -350,7 +351,7 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
         determinism = {"repeats": repeats, "cases": len(cases), "identical": same}
     summary = summarize(all_runs[0], verify_chain(audit_path), determinism)
     summary["reasoner"] = reasoner
-    summary["model"] = settings.model if reasoner == "claude" else None
+    summary["model"] = {"claude": settings.model, "gemini": settings.gemini_model}.get(reasoner)
     write_report(out, reasoner, summary, all_runs[0])
     return summary, all_runs[0], out
 

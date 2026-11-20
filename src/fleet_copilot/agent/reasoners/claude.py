@@ -24,38 +24,19 @@ from typing import Any
 
 from fleet_copilot.agent.prompts import (
     AGENT_SYSTEM,
+    PLAN_SCHEMA,
     PLANNER_SYSTEM,
     agent_turn_message,
     budget_message,
+    normalize_plan,
+    planner_message,
     revision_message,
-    turn_context,
 )
 from fleet_copilot.agent.reasoners.base import ActResult, PlanResult, ReasonerContext
 from fleet_copilot.config import REFUSAL_FALLBACK_MODELS, Settings
 
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 MAX_TOKENS = 16000
-
-PLAN_SCHEMA: dict[str, Any] = {
-    "type": "object",
-    "properties": {
-        "intent": {"type": "string", "enum": ["question", "insight", "action", "out_of_scope", "clarification"]},
-        "goal": {"type": "string"},
-        "steps": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {"description": {"type": "string"}, "tools": {"type": "array", "items": {"type": "string"}}},
-                "required": ["description", "tools"],
-                "additionalProperties": False,
-            },
-        },
-        "needs_actions": {"type": "boolean"},
-        "assumptions": {"type": "array", "items": {"type": "string"}},
-    },
-    "required": ["intent", "goal", "steps", "needs_actions", "assumptions"],
-    "additionalProperties": False,
-}
 
 
 def _get(block: Any, key: str) -> Any:
@@ -121,17 +102,9 @@ class ClaudeReasoner:
 
     # ------------------------------------------------------------------ planning
     def plan(self, state: dict[str, Any], rctx: ReasonerContext) -> PlanResult:
-        v = rctx.view
-        ctxline = turn_context(v.display_name, v.tenant_id, v.window_label, v.as_of, len(v.device_ids()))
-        catalog = "\n".join(f"- {s.name} [{s.kind}]: {s.description}" for s in rctx.registry.specs)
-        recent = state.get("history", [])[-3:]
-        hist = "\n".join(f"- Q: {h['question']}\n  A: {h['answer'][:400]}" for h in recent)
-        msg = (f"{ctxline}\n\nTool catalog:\n{catalog}\n\n"
-               + (f"Recent conversation (for follow-up references):\n{hist}\n\n" if hist else "")
-               + f"Request: {state['question']}\n\nReturn the plan as JSON.")
+        ctxline, msg = planner_message(state, rctx)
         resp = self._create(system=PLANNER_SYSTEM, messages=[{"role": "user", "content": msg}],
                             output_format={"type": "json_schema", "schema": PLAN_SCHEMA})
-        known = set(rctx.registry.names())
         if _get(resp, "stop_reason") == "refusal":
             plan = {"intent": "out_of_scope", "goal": state["question"], "steps": [], "needs_actions": False,
                     "assumptions": [], "refused": True}
@@ -142,9 +115,7 @@ class ClaudeReasoner:
             except (json.JSONDecodeError, TypeError):
                 plan = {"intent": "question", "goal": state["question"], "steps": [], "needs_actions": False,
                         "assumptions": ["planner output could not be parsed; proceeding without a fixed plan"]}
-        for step in plan.get("steps", []):
-            step["tools"] = [t for t in step.get("tools", []) if t in known]
-        plan["reasoner"] = self.name
+        plan = normalize_plan(plan, state["question"], set(rctx.registry.names()), self.name)
         opening = {"role": "user", "content": agent_turn_message(ctxline, state["question"], plan)}
         return PlanResult(plan=plan, transcript_add=[opening])
 
