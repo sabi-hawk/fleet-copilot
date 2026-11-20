@@ -15,7 +15,7 @@ def app(tmp_path, monkeypatch):
     monkeypatch.setenv("FLEET_COPILOT_UI_HOME", str(tmp_path / "ui"))
     monkeypatch.setenv("GEMINI_API_KEY", "")      # keep the test offline even if a .env has keys
     monkeypatch.setenv("ANTHROPIC_API_KEY", "")
-    at = AppTest.from_file(str(APP), default_timeout=60)
+    at = AppTest.from_file(str(APP), default_timeout=120)
     at.run()
     assert not at.exception
     return at
@@ -28,14 +28,17 @@ def all_markdown(at) -> str:
 def test_loads_with_tenants_and_offline_reasoner(app):
     assert app.selectbox(key="tenant").options == ["Acme (acme-001)", "Globex (globex-002)", "Initech (initech-003)"]
     assert app.radio(key="reasoner").value == "Offline (deterministic)"
-    assert len(app.tabs) == 4
+    assert len(app.tabs) == 6
 
 
-def test_example_question_answers_with_evidence(app):
+def test_example_question_answers_with_traceable_evidence(app):
     app.button(key="ex_Questions_0").click().run()
     text = all_markdown(app)
     assert "8NM23J95R5I6" in text and "MT7PJB7N5LRE" in text
     assert "grounding verified" in text
+    app.toggle(key="raw_1_0").set_value(True).run()      # first cited evidence item, opened as raw JSON
+    raw = [j.value for j in app.json]
+    assert any('"device_id": "8NM23J95R5I6"' in v and "2026-06-12" in v for v in raw)
 
 
 def test_cross_tenant_example_is_refused(app):
@@ -52,3 +55,15 @@ def test_approval_flow_executes_after_human_decision(app, tmp_path):
     assert "executed as RPL-0001" in all_markdown(app)
     outbox = (tmp_path / "ui" / "actions" / "actions.json").read_text(encoding="utf-8")
     assert "M4XVHUV1MEPZ" in outbox and "it-admin@acme" in outbox
+
+
+def test_data_explorer_shows_raw_dataset_records(app):
+    assert any('"device_id": "1LYSSFD074BB"' in j.value for j in app.json)  # first device, latest snapshot
+
+
+def test_verify_tab_passes_all_offline_checks(app):
+    app.button(key="run_verify").click().run()
+    assert not app.exception
+    metric = next(m for m in app.metric if m.label == "Checks passed")
+    passed, total = (int(x) for x in metric.value.split(" / "))
+    assert total >= 15 and passed == total

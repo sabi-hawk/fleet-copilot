@@ -11,7 +11,7 @@ statement it makes cites evidence that traces back to a line of the raw dataset.
 | Held-out paraphrases (14 cases, never tuned against) | **11/14**; all 3 failures are safe declines | **14/14** on both full runs |
 | Safety invariants | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit chain intact | same: **0 / 0 / 0**, audit chain intact on every run |
 | Determinism | 50/50 byte-identical answers across repeated runs | `temperature` 0 and a fixed seed; outcome-level variance observed (see details) |
-| Unit/integration tests | 118 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
+| Unit/integration tests | 120 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
 
 > **What ran live and what did not.** The copilot has three interchangeable reasoners behind one graph: **Claude**
 > (Anthropic SDK, `claude-opus-5-5` by default), **Gemini** (Google Gen AI SDK) and a **deterministic rule-based reasoner**.
@@ -47,7 +47,7 @@ python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 pip install -e ".[dev,ui]"              # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 118 tests, ~20 seconds, no network
+pytest                                  # 120 tests, ~30 seconds, no network
 ```
 
 **Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
@@ -81,12 +81,24 @@ fleet-copilot ui          # opens http://localhost:8501
 | Area | What it does |
 |---|---|
 | Sidebar | Pick the organization (the session is bound to it), the reasoner (Offline, plus Gemini or Claude when a key is set) and the approver identity |
-| 💬 Copilot | Chat with one-click example questions: the brief's questions, insights, actions and guardrail probes. Every answer shows its cited evidence (with dataset line numbers), the plan and the tool calls. Action proposals appear as approval cards with Approve/Reject per proposal; nothing runs until you submit. |
-| 📊 Fleet insights | Every detector's findings for the organization, ranked by severity, each with evidence and explanation |
+| 💬 Copilot | Chat with one-click example questions: the brief's questions, insights, actions and guardrail probes. Each answer shows a one-line trace (guard → plan → tools → grounding → time). Expandable panels show its cited evidence, where any item opens the **raw dataset record** it came from, and the plan and tool calls. Action proposals appear as approval cards with Approve/Reject per proposal; nothing runs until you submit. |
+| 🔎 Data explorer | The organization's devices straight from the dataset (latest snapshot): a sortable table, per-device 30-day charts for disk, memory and battery, compliance and software history, and the raw JSON record for any date |
+| ✅ Verify answers | Runs the organization's golden cases through the copilot and shows the independently prepared expected answer next to what the copilot said, pass or fail |
+| 📊 Fleet insights | Every detector's findings for the organization, ranked by severity, each with evidence (including raw records) and an explanation |
 | 📦 Action outbox | Tickets, orders, replacement flags and notifications that were approved and executed |
-| 🧾 Audit log | The organization's audit events, plus a button to verify the hash chain |
+| 🧾 Audit log | The organization's audit events, filterable by type, plus a button to verify the hash chain |
 
 The UI keeps its own outbox and audit log under `var/ui/`; **Reset demo data** clears them.
+
+### Checking answers yourself
+
+Every answer can be traced to the raw data:
+
+1. **Open the evidence.** Each answer cites IDs like `[E2]`; the Evidence panel lists them with the dataset line numbers they came from.
+2. **Open the raw record.** Use **Show raw record** in the UI, or open `data/device-telemetry-dataset.ndjson` in an editor and jump to that line (VS Code: Ctrl+G).
+3. **Recompute the figure.** For example, MT7PJB7N5LRE's latest snapshot is line 240. It shows `available_bytes` 10995116278 and `size_bytes` 549755813888, which is 2.0% free (10.2 GB of 512 GB), matching the answer.
+4. **Cross-check the whole answer.** Use the **Data explorer** (sort by "disk free %", for instance), or compare with the expected answers in [`docs/DATASET.md`](docs/DATASET.md).
+5. **Run the independent checks.** Use **Verify answers** in the UI, or run `fleet-copilot eval`.
 
 ### Command line
 
@@ -143,7 +155,7 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 118 unit/integration tests
+pytest                                                   # 120 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
 fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases; 11/14 is below the default gate)
 fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
@@ -275,7 +287,7 @@ src/fleet_copilot/
   evals/runner.py        evaluation runner and metrics
   cli.py, ui/app.py      fleet-copilot CLI and Streamlit web UI
 evals/golden/*.yaml      golden cases       evals/heldout/*.yaml    held-out paraphrases
-tests/                   118 tests          docs/                   dataset profile, assumptions
+tests/                   120 tests          docs/                   dataset profile, assumptions
 ```
 
 ## 5. Tool catalog
