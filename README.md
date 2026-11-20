@@ -5,20 +5,18 @@ trends from 30 days of telemetry, and proposes operational actions that run only
 It is a **LangGraph** agent in Python with an explicit plan, then tool loop, then reflect, then policy, then approval, then verify pipeline. Every factual
 statement it makes cites evidence that traces back to a line of the raw dataset.
 
-| | Result (deterministic reasoner, reproducible offline) |
-|---|---|
-| Golden evaluation suite (50 cases: Q&A, insights, actions, guardrails) | **50/50 pass**; device-set precision/recall **1.0/1.0**; 249 citations, **100% valid**; numeric support **100%** |
-| Held-out paraphrases (14 cases, never tuned against) | **11/14 pass**; all 3 failures are safe declines (no wrong data, no actions) |
-| Safety invariants across all cases | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit hash chain intact |
-| Determinism | 50/50 byte-identical answers across repeated runs |
-| Unit/integration tests | 112 passing, including fault-injection tests that prove the evaluator catches a broken agent |
+| | Deterministic reasoner (offline, reproducible) | Live LLM: Gemini `gemini-3.5-flash-lite` (free tier) |
+|---|---|---|
+| Golden suite (50 cases + 1 multi-turn LLM-only case) | **50/50**; device-set precision/recall **1.0/1.0**; 249 citations, 100% valid | **51/51** and **50/51** on two full runs; **30/30** on the final code before the free-tier quota ran out ([details](#live-llm-evaluation-gemini)) |
+| Held-out paraphrases (14 cases, never tuned against) | **11/14**; all 3 failures are safe declines | **14/14** on both full runs |
+| Safety invariants | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit chain intact | same: **0 / 0 / 0**, audit chain intact on every run |
+| Determinism | 50/50 byte-identical answers across repeated runs | `temperature` 0 and a fixed seed; outcome-level variance observed (see details) |
+| Unit/integration tests | 114 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
 
-> **What ran live and what did not.** The copilot has two interchangeable reasoners: **Claude** (Anthropic SDK,
-> `claude-opus-5-5` by default) and a **deterministic rule-based reasoner**. No Anthropic API key was available in the
-> development environment, so every number above comes from the deterministic reasoner. The Claude path is fully
-> implemented and its loop mechanics are tested against a scripted fake client (`tests/test_claude_reasoner.py`), but its
-> answer quality has **not** been measured live. Run `fleet-copilot eval --reasoner claude` with a key to measure it on the
-> same golden set.
+> **What ran live and what did not.** The copilot has three interchangeable reasoners behind one graph: **Claude**
+> (Anthropic SDK, `claude-opus-5-5` by default), **Gemini** (Google Gen AI SDK) and a **deterministic rule-based reasoner**.
+> - **Gemini ran live** against the real API on a free Google AI Studio key (results above).
+> - **Claude did not run live:** no Anthropic API key was available. The Claude path is fully implemented and its loop mechanics are tested against a scripted fake client (`tests/test_claude_reasoner.py`). Its answer quality has **not** been measured; run `fleet-copilot eval --reasoner claude` with a key to measure it on the same golden set.
 
 ---
 
@@ -49,7 +47,7 @@ python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 pip install -e ".[dev]"                 # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 112 tests, ~10 seconds, no network
+pytest                                  # 114 tests, ~10 seconds, no network
 ```
 
 **Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
@@ -127,7 +125,7 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 112 unit/integration tests
+pytest                                                   # 114 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
 fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases; 11/14 is below the default gate)
 fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
@@ -181,6 +179,32 @@ below 90%, so it can gate CI. Reference reports are committed in [`evals/reports
 | golden / guardrails | 11 | 11 | cross-tenant (name, device ID, employee ID, hostname, "all companies"), injection, pre-approval claims, invalid approvers |
 | held-out paraphrases | 14 | 11 | rule-based baseline brittleness; safe failures |
 
+### Live LLM evaluation (Gemini)
+
+The same golden and held-out suites were run against the live Gemini API on a **free** Google AI Studio key, with 3
+parallel workers. Free-tier constraints shaped the setup:
+- `gemini-3.5-flash` allows only **20 requests per day** per project; the first attempt hit this after a few cases, and those results were discarded.
+- `gemini-2.5-flash` is retired for new users.
+- `gemini-3.5-flash-lite` (thinking level LOW) has a separate, larger quota and was used for every run below.
+
+| Run (gemini-3.5-flash-lite) | Code | Golden | Held-out | What it surfaced |
+|---|---|---|---|---|
+| 1 | `08746a5` | 51/51 | 14/14 | Reading the answers (not just the scores) showed the model narrating the internal reflection prompt ("the planned step is not needed because…") in one answer. Fixed: the reflection note is now marked internal and asks for the final answer only. |
+| 2 | reflection fix | 50/51 | 14/14 | The single failure was **not** a missing device: the model wrote `8NM` + line break + `23J95R5I6`, splitting a device ID. The eval correctly scored what a user would see. Fixed: compose re-joins *known* IDs broken by whitespace (audited as `output_normalized`). |
+| 3 | `84b1037` (final) | **30/30** run, 21 not run | not run | The free-tier daily quota for flash-lite ran out mid-run. The runner records the remaining cases as **NOT RUN (quota)** and excludes them from every metric, instead of counting them as failures. |
+
+- **Artifacts.** Only run 3's report ([`evals/reports/reference/gemini-golden/`](evals/reports/reference/gemini-golden/)) is committed, because runs 1–2 were superseded by the fixes above. Their numbers are copied from the run output at the time.
+- **Run 3 metrics:**
+  - device-set precision/recall 1.0/1.0;
+  - insight recall 1.0;
+  - 102 citations, 100% valid;
+  - 0 evidence-only fallbacks;
+  - numeric support 0.87 (a soft metric: some restated figures, such as derived percentages, did not match evidence within tolerance);
+  - refusal recall 1.0, 0 false refusals, action-outcome accuracy 1.0.
+- **What the LLM adds over the baseline.** It answered all three held-out paraphrases the rule-based parser declines ("haven't been upgraded to macOS 15", "stopped locking their screens", "send … a heads-up"). It also resolved the multi-turn follow-up ("notify the employees who use *those* devices").
+- **Latency.** 25–40 s per case on average, almost entirely free-tier API queueing; the graph's own nodes take about 0.1 s.
+- **Reproduce:** `fleet-copilot eval --reasoner gemini --workers 3 --min-pass 0`, with `GEMINI_API_KEY` set and optionally `FLEET_COPILOT_GEMINI_MODEL=gemini-3.5-flash-lite`. To complete a quota-truncated run after the daily reset, use `--only <case-id-prefix>`.
+
 ## 4. Agent architecture
 
 ```mermaid
@@ -233,7 +257,7 @@ src/fleet_copilot/
   evals/runner.py        evaluation runner and metrics
   cli.py                 fleet-copilot CLI
 evals/golden/*.yaml      golden cases       evals/heldout/*.yaml    held-out paraphrases
-tests/                   112 tests          docs/                   dataset profile, assumptions
+tests/                   114 tests          docs/                   dataset profile, assumptions
 ```
 
 ## 5. Tool catalog
@@ -353,8 +377,8 @@ the brief's exact signatures and only ever create proposals.
 
 ## 9. Limitations and next steps
 
-- **Measure Claude live.** Run `fleet-copilot eval --reasoner claude` and the held-out set to compare against the baseline. Add an LLM-judge pass for answer helpfulness, which the current outcome checks do not measure.
-- The verifier checks entities, citations and figures, not full semantic entailment. Next: claim-level entailment against cited evidence.
+- **Measure Claude live**, and complete the final-code Gemini run (21 golden and 14 held-out cases were cut off by the free-tier daily quota). Run several repeats per LLM to report variance rather than single-run scores. Add an LLM-judge pass for answer helpfulness, which the current outcome checks do not measure.
+- The verifier checks entities, citations and figures, not full semantic entailment. Next: claim-level entailment against cited evidence, and a completeness check that an answer listing devices covers every device in the tool's scope evidence.
 - Telemetry is a static 30-day export. A streaming deployment would recompute detectors incrementally and add alert routing.
 - Thresholds are global. Per-tenant policy configuration (thresholds, software review list, approver roles and quorum) would be the next production step.
 - Authentication, RBAC and real integrations are out of scope ([`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md)).

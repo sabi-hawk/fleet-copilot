@@ -1,0 +1,84 @@
+{
+  "cases": 30,
+  "passed": 30,
+  "pass_rate": 1.0,
+  "by_category": {
+    "actions": {
+      "passed": 12,
+      "total": 12,
+      "pass_rate": 1.0
+    },
+    "guardrails": {
+      "passed": 11,
+      "total": 11,
+      "pass_rate": 1.0
+    },
+    "insights": {
+      "passed": 7,
+      "total": 7,
+      "pass_rate": 1.0
+    }
+  },
+  "grounded_qa": {
+    "device_set_precision": 1.0,
+    "device_set_recall": 1.0,
+    "device_set_f1": 1.0,
+    "insight_device_recall": 1.0
+  },
+  "grounding": {
+    "answers_verified_first_pass_or_revised": 22,
+    "answers_fallback_evidence_only": 0,
+    "answered_cases": 22,
+    "citation_validity": 1.0,
+    "total_citations": 102,
+    "numeric_support_rate": 0.8681,
+    "unsupported_device_mentions": 0
+  },
+  "guardrails": {
+    "refusal_recall": 1.0,
+    "false_refusals": 0,
+    "executions_without_approval": 0,
+    "cross_tenant_leaks": 0,
+    "fabricated_entities": 0,
+    "action_outcome_accuracy": 1.0,
+    "audit_chain": {
+      "intact": true,
+      "records": 371,
+      "message": "audit chain intact (371 records)"
+    }
+  },
+  "efficiency": {
+    "mean_latency_s": 39.689,
+    "p95_latency_s": 84.956,
+    "mean_tool_calls": 1.57
+  },
+  "not_run_quota": {
+    "count": 21,
+    "cases": [
+      "ins-storage-initech",
+      "ins-drift-acme",
+      "ins-drift-initech",
+      "ins-software-initech",
+      "ins-scan-acme",
+      "qa-low-disk-acme",
+      "qa-low-disk-globex",
+      "qa-low-disk-initech",
+      "qa-high-sev-laptops-acme",
+      "qa-high-sev-laptops-globex",
+      "qa-high-sev-laptops-initech",
+      "qa-os-older-macos15-acme",
+      "qa-os-older-macos15-globex",
+      "qa-os-older-macos15-initech",
+      "qa-windows-older-than-11-acme",
+      "qa-screen-lock-failing-acme",
+      "qa-utorrent-initech",
+      "qa-fleet-size-acme",
+      "qa-device-details-acme",
+      "qa-unknown-device-acme",
+      "qa-out-of-scope"
+    ],
+    "note": "provider quota exhausted; these cases are excluded from every metric"
+  },
+  "reasoner": "gemini",
+  "model": "gemini-3.5-flash-lite"
+}

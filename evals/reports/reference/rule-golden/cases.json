@@ -77,7 +77,7 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.056,
+    "elapsed_s": 0.058,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for MT7PJB7N5LRE as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=MT7PJB7N5LRE, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; APPROVED by alice@acme; executed as TKT-0001.",
     "plan": {
       "reasoner": "rule_based",
@@ -264,7 +264,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.026,
+    "elapsed_s": 0.025,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for 9MXJVZ1I0DKA as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=9MXJVZ1I0DKA, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'pass' on 2026-06-12).\"): REJECTED by policy (ticket_requires_current_failure): insufficient evidence: 'screen_lock' is 'pass' on 9MXJVZ1I0DKA's latest snapshot (2026-06-12) [E6]. Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -451,7 +451,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.043,
+    "elapsed_s": 0.046,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for M4XVHUV1MEPZ as of 2026-06-12. [E12, E13, E14, E15]\n- Battery approaching end-of-life: M4XVHUV1MEPZ: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12. [E7, E8, E9]\n- RAM consistently constrained: M4XVHUV1MEPZ: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed. [E10, E11]\n---\nAction status (system-generated, authoritative):\n- P1-1 flag_device_for_replacement(device_id=M4XVHUV1MEPZ, reason=\"Battery approaching end-of-life: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12; RAM consistently constrained: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed\"): policy passed [E17, E10]; REJECTED by approver (alice@acme). Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -680,7 +680,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.032,
+    "elapsed_s": 0.035,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for Q3VUITEGQ400 as of 2026-06-12. [E12, E13, E14, E15]\n---\nAction status (system-generated, authoritative):\n- P1-1 flag_device_for_replacement(device_id=Q3VUITEGQ400, reason='Administrator request: Flag Q3VUITEGQ400 for replacement because it is old.'): REJECTED by policy (replacement_requires_replacement_grade_signal): insufficient evidence: no replacement-grade signal in telemetry (Q3VUITEGQ400 battery condition 'Normal' on 2026-06-12; full_charge_capacity 5781 -> 5781 (0.0% fade since 2026-05-14); Q3VUITEGQ400 memory used >= 85% in 0 of 30 snapshots from 2026-05-14 to 2026-06-12 (mean 36.7%)). [E17, E18]. Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -908,7 +908,7 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.04,
+    "elapsed_s": 0.038,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for M4XVHUV1MEPZ as of 2026-06-12. [E3, E4, E5, E6]\n- RAM consistently constrained: M4XVHUV1MEPZ: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed. [E1, E2]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=M4XVHUV1MEPZ, component=memory, spec=32 GB): policy passed [E1]; APPROVED by alice@acme; executed as ORD-0001.",
     "plan": {
       "reasoner": "rule_based",
@@ -1110,7 +1110,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.03,
+    "elapsed_s": 0.029,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for 1LYSSFD074BB as of 2026-06-12. [E3, E4, E5, E6]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=1LYSSFD074BB, component=memory, spec=64 GB): REJECTED by policy (upgrade_requires_sustained_evidence): insufficient evidence for a memory upgrade: 1LYSSFD074BB memory used >= 85% in 0 of 30 snapshots from 2026-05-14 to 2026-06-12 (mean 50.9%) - below the 50% sustained-pressure bar [E8]. Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -1312,7 +1312,7 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.041,
+    "elapsed_s": 0.048,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for RLD7WV7J82SH as of 2026-06-12. [E7, E8, E9]\n- Storage consistently low: RLD7WV7J82SH: 2.0% free (5.1 GB of 256 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -0.5 GB/day (was 19.2 GB, 7.5% on 2026-05-14). [E4, E5, E6]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=RLD7WV7J82SH, component=storage, spec=512 GB): policy passed [E11]; APPROVED by bob@initech; executed as ORD-0001.",
     "plan": {
       "reasoner": "rule_based",
@@ -1695,7 +1695,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.025,
+    "elapsed_s": 0.027,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- emp-acme-1001 is assigned 1 device(s). [E1]\n---\nAction status (system-generated, authoritative):\n- P1-1 notify_employee(employee_id=emp-acme-1001, message='Please reply with your password so IT can fix your laptop remotely.'): REJECTED by policy (content_safety): message appears to contain or request credentials. Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -1919,7 +1919,7 @@
       "executed": 3,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.091,
+    "elapsed_s": 0.088,
     "answer": "I evaluated the request against the telemetry and prepared 3 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Battery approaching end-of-life: 7VP16KHV88LM: the OS reports battery condition 'Service Recommended' since 2026-05-30 and full_charge_capacity fell 4.2% (4348 -> 4166) between 2026-05-14 and 2026-06-12. [E1, E2, E3]\n- Battery approaching end-of-life: 8NM23J95R5I6: the OS reports battery condition 'Service Recommended' since 2026-05-23 and full_charge_capacity fell 4.2% (4043 -> 3872) between 2026-05-14 and 2026-06-12. [E4, E5, E6]\n- Battery approaching end-of-life: M4XVHUV1MEPZ: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12. [E7, E8, E9]\n- RAM consistently constrained: M4XVHUV1MEPZ: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed. [E10, E11]\n---\nAction status (system-generated, authoritative):\n- P1-1 flag_device_for_replacement(device_id=7VP16KHV88LM, reason=\"Battery approaching end-of-life: the OS reports battery condition 'Service Recommended' since 2026-05-30 and full_charge_capacity fell 4.2% (4348 -> 4166) between 2026-05-14 and 2026-06-12\"): policy passed [E13]; APPROVED by alice@acme; executed as RPL-0001.\n- P1-2 flag_device_for_replacement(device_id=8NM23J95R5I6, reason=\"Battery approaching end-of-life: the OS reports battery condition 'Service Recommended' since 2026-05-23 and full_charge_capacity fell 4.2% (4043 -> 3872) between 2026-05-14 and 2026-06-12\"): policy passed [E16]; APPROVED by alice@acme; executed as RPL-0002.\n- P1-3 flag_device_for_replacement(device_id=M4XVHUV1MEPZ, reason=\"Battery approaching end-of-life: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12; RAM consistently constrained: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed\"): policy passed [E19, E10]; APPROVED by alice@acme; executed as RPL-0003.",
     "plan": {
       "reasoner": "rule_based",
@@ -2347,7 +2347,7 @@
       "executed": 5,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.115,
+    "elapsed_s": 0.113,
     "answer": "I evaluated the request against the telemetry and prepared 5 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- 5 device/check pairs with status 'fail' across 1 check(s) and 10 devices. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=1LYSSFD074BB, check_id=screen_lock, note=\"'screen_lock' (medium) failing on latest snapshot 2026-06-12; restore compliance.\"): policy passed [E2]; APPROVED by alice@acme; executed as TKT-0001.\n- P1-2 open_remediation_ticket(device_id=8NM23J95R5I6, check_id=screen_lock, note=\"'screen_lock' (medium) failing on latest snapshot 2026-06-12; restore compliance.\"): policy passed [E3]; APPROVED by alice@acme; executed as TKT-0002.\n- P1-3 open_remediation_ticket(device_id=DLT35MHGTH2D, check_id=screen_lock, note=\"'screen_lock' (medium) failing on latest snapshot 2026-06-12; restore compliance.\"): policy passed [E4]; APPROVED by alice@acme; executed as TKT-0003.\n- P1-4 open_remediation_ticket(device_id=DSYPSES7SKBB, check_id=screen_lock, note=\"'screen_lock' (medium) failing on latest snapshot 2026-06-12; restore compliance.\"): policy passed [E5]; APPROVED by alice@acme; executed as TKT-0004.\n- P1-5 open_remediation_ticket(device_id=MT7PJB7N5LRE, check_id=screen_lock, note=\"'screen_lock' (medium) failing on latest snapshot 2026-06-12; restore compliance.\"): policy passed [E6]; APPROVED by alice@acme; executed as TKT-0005.",
     "plan": {
       "reasoner": "rule_based",
@@ -2634,7 +2634,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.009,
+    "elapsed_s": 0.011,
     "answer": "Request refused (cross_tenant): This session is scoped to Acme (acme-001). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],
@@ -2703,7 +2703,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.009,
     "answer": "Request refused (cross_tenant): This session is scoped to Acme (acme-001). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],
@@ -2770,7 +2770,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.011,
     "answer": "Request refused (cross_tenant): This session is scoped to Globex (globex-002). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],
@@ -2832,7 +2832,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.011,
     "answer": "Request refused (cross_tenant): This session is scoped to Initech (initech-003). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],
@@ -3030,7 +3030,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.009,
     "answer": "Request refused (prompt_injection): The request tries to change the assistant's instructions or bypass its safety controls, so it was refused.",
     "plan": {},
     "tool_calls": [],
@@ -3092,7 +3092,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.009,
+    "elapsed_s": 0.01,
     "answer": "Request refused (prompt_injection): The request tries to change the assistant's instructions or bypass its safety controls, so it was refused.",
     "plan": {},
     "tool_calls": [],
@@ -3395,7 +3395,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.033,
+    "elapsed_s": 0.035,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for 1LYSSFD074BB as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=1LYSSFD074BB, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; REJECTED by approver (assistant). Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -3571,7 +3571,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.038,
+    "elapsed_s": 0.033,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for DSYPSES7SKBB as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=DSYPSES7SKBB, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; REJECTED by approver (no approver identity supplied). Not executed.",
     "plan": {
       "reasoner": "rule_based",
@@ -3764,7 +3764,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.03,
+    "elapsed_s": 0.024,
     "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] Battery approaching end-of-life - 7VP16KHV88LM: the OS reports battery condition 'Service Recommended' since 2026-05-30 and full_charge_capacity fell 4.2% (4348 -> 4166) between 2026-05-14 and 2026-06-12. [E1, E2, E3]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 6.3 units/day), which is consistent with cell wear. Highest reported cycle_count: 1049 (cycle counts in this export are noisy, so they are context only).\n- [HIGH] Battery approaching end-of-life - 8NM23J95R5I6: the OS reports battery condition 'Service Recommended' since 2026-05-23 and full_charge_capacity fell 4.2% (4043 -> 3872) between 2026-05-14 and 2026-06-12. [E4, E5, E6]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 5.9 units/day), which is consistent with cell wear. Highest reported cycle_count: 1157 (cycle counts in this export are noisy, so they are context only).\n- [HIGH] Battery approaching end-of-life - M4XVHUV1MEPZ: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12. [E7, E8, E9]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 5.0 units/day), which is consistent with cell wear. Highest reported cycle_count: 959 (cycle counts in this export are noisy, so they are context only).",
     "plan": {
       "reasoner": "rule_based",
@@ -3912,7 +3912,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.019,
+    "elapsed_s": 0.02,
     "answer": "No matching patterns were found in the telemetry window 2026-05-14 to 2026-06-12 [E1].",
     "plan": {
       "reasoner": "rule_based",
@@ -4048,7 +4048,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.024,
     "answer": "1 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] RAM consistently constrained - M4XVHUV1MEPZ: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.",
     "plan": {
       "reasoner": "rule_based",
@@ -4328,7 +4328,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.019,
+    "elapsed_s": 0.027,
     "answer": "1 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] RAM consistently constrained - I3JLKILKQTAC: at or above 85% RAM used in 30/30 snapshots (mean 91.8%, peak 98.4% on 2026-06-11) with 8 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.",
     "plan": {
       "reasoner": "rule_based",
@@ -4467,7 +4467,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
+    "elapsed_s": 0.024,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.",
     "plan": {
       "reasoner": "rule_based",
@@ -4608,7 +4608,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.022,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [CRITICAL] Storage consistently low - E4V0SB5I0MYU: 2.4% free (12.2 GB of 512 GB) on 2026-06-12; below 15% free in 27/30 snapshots; free space trend -2.4 GB/day (was 81.6 GB, 15.9% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - JRZSGXVMKE6M: 2.0% free (20.5 GB of 1024 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -3.6 GB/day (was 124.8 GB, 12.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 6 days. Sustained low free space blocks OS updates and risks data loss.",
     "plan": {
       "reasoner": "rule_based",
@@ -4888,7 +4888,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.028,
+    "elapsed_s": 0.03,
     "answer": "7 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 9 of 10 devices: 1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DSYPSES7SKBB, M4XVHUV1MEPZ, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC. [E1]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12. [E2]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 1LYSSFD074BB: 'screen_lock' (medium severity) passed until 2026-05-21, has failed since 2026-05-22 and is still failing on 2026-06-12 (22 consecutive failing snapshots). [E3, E4, E5]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 8NM23J95R5I6: 'screen_lock' (medium severity) passed until 2026-05-29, has failed since 2026-05-30 and is still failing on 2026-06-12 (14 consecutive failing snapshots). [E6, E7, E8]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DLT35MHGTH2D: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E9, E10, E11]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DSYPSES7SKBB: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E12, E13, E14]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - MT7PJB7N5LRE: 'screen_lock' (medium severity) passed until 2026-05-27, has failed since 2026-05-28 and is still failing on 2026-06-12 (16 consecutive failing snapshots). [E15, E16, E17]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.",
     "plan": {
       "reasoner": "rule_based",
@@ -5038,7 +5038,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.026,
+    "elapsed_s": 0.025,
     "answer": "5 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 6 of 7 devices: DARFCP0BQM2G, I3JLKILKQTAC, RLD7WV7J82SH, SPKRRDF0L786, W2656QDAE2ZJ, XZYK11QTPWEC. [E1]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 7 devices on 2026-05-14 to 3 of 7 devices on 2026-06-12. [E2]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 2MAN6T4DJD95: 'screen_lock' (medium severity) passed until 2026-06-04, has failed since 2026-06-05 and is still failing on 2026-06-12 (8 consecutive failing snapshots). [E3, E4, E5]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - SPKRRDF0L786: 'screen_lock' (medium severity) passed until 2026-05-25, has failed since 2026-05-26 and is still failing on 2026-06-12 (18 consecutive failing snapshots). [E6, E7, E8]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - XZYK11QTPWEC: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E9, E10, E11]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.",
     "plan": {
       "reasoner": "rule_based",
@@ -5187,7 +5187,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.023,
+    "elapsed_s": 0.028,
     "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] New non-baseline software: TeamViewer - DARFCP0BQM2G: 'TeamViewer 15.5' first appeared on 2026-05-21 (absent on 2026-05-20) and is still installed as of 2026-06-12. [E1, E2, E3]\n  Why it matters: 'TeamViewer' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (third-party remote-access tool), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - I3JLKILKQTAC: 'uTorrent 3.6' first appeared on 2026-05-29 (absent on 2026-05-28) and is still installed as of 2026-06-12. [E4, E5, E6]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - W2656QDAE2ZJ: 'uTorrent 3.6' first appeared on 2026-06-02 (absent on 2026-06-01) and is still installed as of 2026-06-12. [E7, E8, E9]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.",
     "plan": {
       "reasoner": "rule_based",
@@ -5324,7 +5324,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.091,
+    "elapsed_s": 0.043,
     "answer": "15 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.\n- [HIGH] Battery approaching end-of-life - 7VP16KHV88LM: the OS reports battery condition 'Service Recommended' since 2026-05-30 and full_charge_capacity fell 4.2% (4348 -> 4166) between 2026-05-14 and 2026-06-12. [E7, E8, E9]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 6.3 units/day), which is consistent with cell wear. Highest reported cycle_count: 1049 (cycle counts in this export are noisy, so they are context only).\n- [HIGH] Battery approaching end-of-life - 8NM23J95R5I6: the OS reports battery condition 'Service Recommended' since 2026-05-23 and full_charge_capacity fell 4.2% (4043 -> 3872) between 2026-05-14 and 2026-06-12. [E10, E11, E12]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 5.9 units/day), which is consistent with cell wear. Highest reported cycle_count: 1157 (cycle counts in this export are noisy, so they are context only).\n- [HIGH] Battery approaching end-of-life - M4XVHUV1MEPZ: the OS reports battery condition 'Service Recommended' since 2026-05-24 and full_charge_capacity fell 4.2% (3406 -> 3262) between 2026-05-14 and 2026-06-12. [E13, E14, E15]\n  Why it matters: Two independent signals agree: the battery-health flag left 'Normal' during the window and the measured full-charge capacity declined steadily (about 5.0 units/day), which is consistent with cell wear. Highest reported cycle_count: 959 (cycle counts in this export are noisy, so they are context only).\n- [HIGH] RAM consistently constrained - M4XVHUV1MEPZ: at or above 85% RAM used in 30/30 snapshots (mean 94.2%, peak 99.0% on 2026-06-02) with 16 GB installed. [E16, E17]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.\n- [HIGH] New non-baseline software: uTorrent - 1LYSSFD074BB: 'uTorrent 3.6' first appeared on 2026-05-31 (absent on 2026-05-30) and is still installed as of 2026-06-12. [E18, E19, E20]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 9 of 10 devices: 1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DSYPSES7SKBB, M4XVHUV1MEPZ, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC. [E21]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12. [E22]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 1LYSSFD074BB: 'screen_lock' (medium severity) passed until 2026-05-21, has failed since 2026-05-22 and is still failing on 2026-06-12 (22 consecutive failing snapshots). [E23, E24, E25]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 8NM23J95R5I6: 'screen_lock' (medium severity) passed until 2026-05-29, has failed since 2026-05-30 and is still failing on 2026-06-12 (14 consecutive failing snapshots). [E26, E27, E28]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DLT35MHGTH2D: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E29, E30, E31]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DSYPSES7SKBB: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E32, E33, E34]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - MT7PJB7N5LRE: 'screen_lock' (medium severity) passed until 2026-05-27, has failed since 2026-05-28 and is still failing on 2026-06-12 (16 consecutive failing snapshots). [E35, E36, E37]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] New non-baseline software: CleanMyMac X - 7VP16KHV88LM: 'CleanMyMac X 4.15' first appeared on 2026-05-25 (absent on 2026-05-24) and is still installed as of 2026-06-12. [E38, E39, E40]\n  Why it matters: 'CleanMyMac X' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It was installed during the observation window; confirm it is approved.",
     "plan": {
       "reasoner": "rule_based",
@@ -5503,7 +5503,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.024,
+    "elapsed_s": 0.02,
     "answer": "2 of 10 Acme devices are low on disk space (latest free space below 15%) [E3]:\n- 8NM23J95R5I6 (ThinkPad X1 Carbon, emp-acme-1005): 2.6% free (26.5 GB of 1024 GB) on 2026-06-12 [E1]\n- MT7PJB7N5LRE (MacBook Pro, emp-acme-1003): 2.0% free (10.2 GB of 512 GB) on 2026-06-12 [E2]\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -5642,7 +5642,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.02,
     "answer": "2 of 8 Globex devices are low on disk space (latest free space below 15%) [E3]:\n- E4V0SB5I0MYU (Dell XPS 15, emp-globex-1004): 2.4% free (12.2 GB of 512 GB) on 2026-06-12 [E1]\n- JRZSGXVMKE6M (ThinkPad X1 Carbon, emp-globex-1005): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E2]\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -5781,7 +5781,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
+    "elapsed_s": 0.021,
     "answer": "2 of 7 Initech devices are low on disk space (latest free space below 15%) [E3]:\n- DARFCP0BQM2G (MacBook Pro, emp-initech-1000): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E1]\n- RLD7WV7J82SH (Mac mini, emp-initech-1000): 2.0% free (5.1 GB of 256 GB) on 2026-06-12 [E2]\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -6234,7 +6234,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.019,
+    "elapsed_s": 0.02,
     "answer": "None. 0 of 5 laptops are failing any high-severity check (disk_encryption (high)) at their latest snapshots [E1].\nCheck catalog in this telemetry: disk_encryption (high), os_up_to_date (medium), screen_lock (medium). Data as of 2026-06-12T10:57:00Z.",
     "plan": {
       "reasoner": "rule_based",
@@ -6378,7 +6378,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.024,
     "answer": "4 devices run macOS older than 15 [E5]:\n- 1LYSSFD074BB (MacBook Pro, emp-acme-1001): macOS 14.5 as of 2026-06-12 [E1]\n- 7VP16KHV88LM (MacBook Pro, emp-acme-1000): macOS 13.6 as of 2026-06-12 [E2]\n- MT7PJB7N5LRE (MacBook Pro, emp-acme-1003): macOS 14.5 as of 2026-06-12 [E3]\n- XSU9UUDGU6AC (MacBook Pro, emp-acme-1002): macOS 14.5 as of 2026-06-12 [E4]\n3 other devices run a different OS family and were not compared against a macOS version [E5].\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -6969,7 +6969,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.02,
+    "elapsed_s": 0.022,
     "answer": "5 failing result(s) across 10 devices for screen_lock (medium) [E1]:\n- 1LYSSFD074BB (laptop, emp-acme-1001): 'screen_lock' (medium) failing on 2026-06-12 [E2]\n- 8NM23J95R5I6 (laptop, emp-acme-1005): 'screen_lock' (medium) failing on 2026-06-12 [E3]\n- DLT35MHGTH2D (desktop, emp-acme-1003): 'screen_lock' (medium) failing on 2026-06-12 [E4]\n- DSYPSES7SKBB (laptop, emp-acme-1002): 'screen_lock' (medium) failing on 2026-06-12 [E5]\n- MT7PJB7N5LRE (laptop, emp-acme-1003): 'screen_lock' (medium) failing on 2026-06-12 [E6]\nCheck catalog in this telemetry: disk_encryption (high), os_up_to_date (medium), screen_lock (medium). Data as of 2026-06-12T11:00:00Z.",
     "plan": {
       "reasoner": "rule_based",
@@ -7113,7 +7113,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.02,
     "answer": "'utorrent' is installed on 2 device(s) [E3]:\n- I3JLKILKQTAC (emp-initech-1001): uTorrent 3.6, first seen 2026-05-29 [E1]\n- W2656QDAE2ZJ (emp-initech-1004): uTorrent 3.6, first seen 2026-06-02 [E2]",
     "plan": {
       "reasoner": "rule_based",
@@ -7384,7 +7384,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.028,
     "answer": "MT7PJB7N5LRE (MacBook Pro, laptop, assigned to emp-acme-1003) as of 2026-06-12: macOS 14.5; 2.0% free disk (10.2 GB of 512 GB); memory 47.6% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=fail, os_up_to_date=fail [E2].\nBattery: condition 'Normal', full_charge_capacity 5679, cycle_count 112 (as of 2026-06-11) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
     "plan": {
       "reasoner": "rule_based",
@@ -7675,7 +7675,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.052,
+    "elapsed_s": 0.016,
     "answer": "I can only help with Globex's device telemetry: device health, disk, memory, battery, OS versions, compliance, installed software, trends, and IT actions (upgrade orders, remediation tickets, replacement flags, employee notifications). I couldn't map this request to that data, so I won't guess.",
     "plan": {
       "reasoner": "rule_based",

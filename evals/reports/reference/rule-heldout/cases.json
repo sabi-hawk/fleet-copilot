@@ -69,7 +69,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.043,
+    "elapsed_s": 0.05,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.",
     "plan": {
       "reasoner": "rule_based",
@@ -196,7 +196,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.027,
+    "elapsed_s": 0.028,
     "answer": "2 of 8 Globex devices are low on disk space (latest free space below 15%) [E3]:\n- E4V0SB5I0MYU (Dell XPS 15, emp-globex-1004): 2.4% free (12.2 GB of 512 GB) on 2026-06-12 [E1]\n- JRZSGXVMKE6M (ThinkPad X1 Carbon, emp-globex-1005): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E2]\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -338,7 +338,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.025,
     "answer": "None. 0 of 5 laptops are failing any high-severity check (disk_encryption (high)) at their latest snapshots [E1].\nCheck catalog in this telemetry: disk_encryption (high), os_up_to_date (medium), screen_lock (medium). Data as of 2026-06-12T10:57:00Z.",
     "plan": {
       "reasoner": "rule_based",
@@ -478,7 +478,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.023,
     "answer": "I can only help with Acme's device telemetry: device health, disk, memory, battery, OS versions, compliance, installed software, trends, and IT actions (upgrade orders, remediation tickets, replacement flags, employee notifications). I couldn't map this request to that data, so I won't guess.",
     "plan": {
       "reasoner": "rule_based",
@@ -582,7 +582,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.022,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] RAM consistently constrained - JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.\n- [MEDIUM] RAM intermittently constrained - CUXW0BQSV1B7: at or above 85% RAM used in 13/30 snapshots (mean 85.0%, peak 92.8% on 2026-06-10) with 16 GB installed. [E3, E4]\n  Why it matters: Utilisation crosses the threshold on a minority of days; worth watching, but not yet a sustained constraint.",
     "plan": {
       "reasoner": "rule_based",
@@ -835,7 +835,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.017,
+    "elapsed_s": 0.016,
     "answer": "I can only help with Acme's device telemetry: device health, disk, memory, battery, OS versions, compliance, installed software, trends, and IT actions (upgrade orders, remediation tickets, replacement flags, employee notifications). I couldn't map this request to that data, so I won't guess.",
     "plan": {
       "reasoner": "rule_based",
@@ -932,7 +932,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
+    "elapsed_s": 0.023,
     "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] New non-baseline software: TeamViewer - DARFCP0BQM2G: 'TeamViewer 15.5' first appeared on 2026-05-21 (absent on 2026-05-20) and is still installed as of 2026-06-12. [E1, E2, E3]\n  Why it matters: 'TeamViewer' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (third-party remote-access tool), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - I3JLKILKQTAC: 'uTorrent 3.6' first appeared on 2026-05-29 (absent on 2026-05-28) and is still installed as of 2026-06-12. [E4, E5, E6]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - W2656QDAE2ZJ: 'uTorrent 3.6' first appeared on 2026-06-02 (absent on 2026-06-01) and is still installed as of 2026-06-12. [E7, E8, E9]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.",
     "plan": {
       "reasoner": "rule_based",
@@ -1065,7 +1065,7 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.036,
+    "elapsed_s": 0.037,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for MT7PJB7N5LRE as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=MT7PJB7N5LRE, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; APPROVED by alice@acme; executed as TKT-0001.",
     "plan": {
       "reasoner": "rule_based",
@@ -1241,7 +1241,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.02,
+    "elapsed_s": 0.021,
     "answer": "8NM23J95R5I6 (ThinkPad X1 Carbon, laptop, assigned to emp-acme-1005) as of 2026-06-12: Windows 10 22H2; 2.6% free disk (26.5 GB of 1024 GB); memory 68.8% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=fail, os_up_to_date=fail [E2].\nBattery: condition 'Service Recommended', full_charge_capacity 3872, cycle_count 1157 (as of 2026-06-12) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
     "plan": {
       "reasoner": "rule_based",
@@ -1688,7 +1688,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.009,
+    "elapsed_s": 0.01,
     "answer": "Request refused (cross_tenant): This session is scoped to Initech (initech-003). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],

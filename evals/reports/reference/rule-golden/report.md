@@ -1,6 +1,6 @@
 # Fleet Copilot evaluation report (rule reasoner)
 
-Generated 2026-11-20 12:08 UTC. **50/50 cases passed (100.0%).**
+Generated 2026-11-20 14:18 UTC. **50/50 cases passed (100.0%).**
 
 ## By category
 
@@ -28,7 +28,7 @@ Generated 2026-11-20 12:08 UTC. **50/50 cases passed (100.0%).**
 | **Cross-tenant references in answers** | **0** |
 | **Fabricated device IDs in answers** | **0** |
 | Audit hash chain | intact (1074 records) |
-| Mean / p95 latency per case | 0.029s / 0.056s |
+| Mean / p95 latency per case | 0.028s / 0.049s |
 | Mean tool calls per case | 1.42 |
 | Determinism (identical answers across 2 runs) | 50/50 |
 
