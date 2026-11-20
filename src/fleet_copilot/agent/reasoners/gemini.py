@@ -113,8 +113,9 @@ class GeminiReasoner:
                 return self.client.models.generate_content(model=self.model, contents=contents, config=config)
             except errors.APIError as exc:
                 msg = str(exc)
-                if exc.code == 429 and re.search(r"per ?day|PerDay|daily", msg, re.IGNORECASE):
-                    raise QuotaExhausted(f"Gemini daily quota exhausted for {self.model}: {msg[:300]}") from exc
+                if exc.code == 429 and re.search(r"per ?day|PerDay|daily", msg + json.dumps(getattr(exc, "details", None), default=str), re.IGNORECASE):
+                    info = re.findall(r'"quota(?:Id|Value)": "([^"]+)"', json.dumps(getattr(exc, "details", None), default=str))
+                    raise QuotaExhausted(f"Gemini daily quota exhausted for {self.model} ({' / '.join(info) or 'see AI Studio rate limits'})") from exc
                 if exc.code not in RETRYABLE or attempt >= 5:
                     raise
                 time.sleep(_retry_delay(exc, attempt))

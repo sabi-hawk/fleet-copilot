@@ -11,7 +11,7 @@ statement it makes cites evidence that traces back to a line of the raw dataset.
 | Held-out paraphrases (14 cases, never tuned against) | **11/14 pass**; all 3 failures are safe declines (no wrong data, no actions) |
 | Safety invariants across all cases | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit hash chain intact |
 | Determinism | 50/50 byte-identical answers across repeated runs |
-| Unit/integration tests | 105 passing, including fault-injection tests that prove the evaluator catches a broken agent |
+| Unit/integration tests | 112 passing, including fault-injection tests that prove the evaluator catches a broken agent |
 
 > **What ran live and what did not.** The copilot has two interchangeable reasoners: **Claude** (Anthropic SDK,
 > `claude-opus-5-5` by default) and a **deterministic rule-based reasoner**. No Anthropic API key was available in the
@@ -49,18 +49,24 @@ python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 pip install -e ".[dev]"                 # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 105 tests, ~10 seconds, no network
+pytest                                  # 112 tests, ~10 seconds, no network
 ```
 
-**Optional: enable the Claude reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY`. With a key, `--reasoner auto`
-(the default) uses Claude; without one it falls back to the deterministic reasoner and says so.
+**Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
+`GEMINI_API_KEY` (Gemini; a free Google AI Studio key works). `--reasoner auto` (the default) uses Claude if its key is set,
+else Gemini, else the deterministic reasoner, and says which one it picked.
 
 | Environment variable | Default | Purpose |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | (unset) | enables the Claude reasoner |
-| `FLEET_COPILOT_MODEL` | `claude-opus-5-5` | model ID |
-| `FLEET_COPILOT_EFFORT` | `high` | `output_config.effort` (`none` omits it, for models that don't support effort) |
-| `FLEET_COPILOT_REFUSAL_FALLBACK` | `on` | server-side refusal fallback (`fallbacks: "default"`) on models that support it |
+| `FLEET_COPILOT_MODEL` | `claude-opus-5-5` | Claude model ID |
+| `FLEET_COPILOT_EFFORT` | `high` | Claude `output_config.effort` (`none` omits it, for models that don't support effort) |
+| `FLEET_COPILOT_REFUSAL_FALLBACK` | `on` | Claude server-side refusal fallback (`fallbacks: "default"`) on models that support it |
+| `GEMINI_API_KEY` | (unset) | enables the Gemini reasoner |
+| `FLEET_COPILOT_GEMINI_MODEL` | `gemini-3.5-flash` | Gemini model ID |
+| `FLEET_COPILOT_GEMINI_THINKING` | `LOW` | Gemini thinking level (`MINIMAL`/`LOW`/`MEDIUM`/`HIGH`, `none` omits it) |
+| `FLEET_COPILOT_LLM_TIMEOUT` | `120` | per-request timeout in seconds (timeouts and 429/5xx are retried with backoff) |
+| `FLEET_COPILOT_LLM_MIN_INTERVAL` | `0` | minimum seconds between LLM calls, to stay under free-tier rate limits |
 | `FLEET_COPILOT_DATASET` | `data/device-telemetry-dataset.ndjson` | telemetry file |
 | `FLEET_COPILOT_HOME` | `var/` | audit log (`audit/audit.jsonl`) and action outbox (`actions/actions.json`) |
 
@@ -121,9 +127,10 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 105 unit/integration tests
+pytest                                                   # 112 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
 fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases; 11/14 is below the default gate)
+fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
 fleet-copilot eval --reasoner claude                     # same golden suite against Claude (needs ANTHROPIC_API_KEY)
 fleet-copilot eval --only qa- --only gr-                 # filter by case-ID prefix
 ```
@@ -209,7 +216,8 @@ flowchart TD
     - The transcript is append-only, and thinking blocks are passed back unchanged.
     - Effort is set through `output_config`, and the server-side refusal fallback is on by default.
     - No sampling parameters are sent, because current models reject them.
-  - **`RuleBasedReasoner`** is a deterministic intent parser with templated, cited answers. It is the reproducible baseline, the keyless fallback and the engine behind every eval number above.
+  - **`GeminiReasoner`** calls Gemini through the official `google-genai` SDK. It uses the same shared planner prompt and plan schema, manual function calling over the same 18 tools (automatic function calling is disabled, so every call passes through the graph's tool node), `temperature` 0 with a fixed seed, and thought signatures replayed unchanged.
+  - **`RuleBasedReasoner`** is a deterministic intent parser with templated, cited answers. It is the reproducible baseline and the keyless fallback.
 - **State and human-in-the-loop.** Each session is a checkpointed LangGraph thread (`InMemorySaver`). `human_approval` calls `interrupt()`; `CopilotSession.resolve_approval` resumes it with `Command(resume=...)`. All state is plain JSON-compatible data, so the checkpointer can persist and resume across the pause.
 
 ```text
@@ -220,12 +228,12 @@ src/fleet_copilot/
   evidence.py            evidence ledger (citation IDs -> snapshots -> dataset lines)
   tools/                 read_tools, insight_tools, action_tools, registry (validation + rendering)
   guardrails/            input_guard, policy (evidence sufficiency), grounding (verifier)
-  agent/                 graph.py (LangGraph), session.py, state.py, prompts.py, reasoners/{claude,rule_based}.py
+  agent/                 graph.py (LangGraph), session.py, state.py, prompts.py, reasoners/{claude,gemini,rule_based}.py
   actions.py, audit.py   action outbox (idempotent), hash-chained audit log
   evals/runner.py        evaluation runner and metrics
   cli.py                 fleet-copilot CLI
 evals/golden/*.yaml      golden cases       evals/heldout/*.yaml    held-out paraphrases
-tests/                   105 tests          docs/                   dataset profile, assumptions
+tests/                   112 tests          docs/                   dataset profile, assumptions
 ```
 
 ## 5. Tool catalog
@@ -334,7 +342,7 @@ the brief's exact signatures and only ever create proposals.
 | **LangGraph with a hand-written graph**, not a prebuilt ReAct agent | Planning, reflection, the policy gate, the approval interrupt and verification are explicit, testable nodes. The brief asks for "planning, tool calling, explicit agent loop". | More code than `create_react_agent`. |
 | **Official `anthropic` SDK inside nodes**, not `langchain-anthropic` | Direct control of current API behavior: adaptive thinking, `output_config.effort`, no sampling parameters, refusal fallback, thinking blocks replayed unchanged. | We own message conversion (`block_to_param`), which is small and tested. |
 | **Analytics as deterministic tools; the LLM orchestrates and explains** | Statistics must be correct and reproducible; LLMs are unreliable at arithmetic over 750 records. | Coverage is limited to the patterns implemented as detectors. The LLM can still combine read tools for novel questions. |
-| **Two reasoners behind one interface** | Reproducible evals and keyless operation (a requirement for "reasonably deterministic execution" and a runnable suite), plus a baseline to compare Claude against. | The rule-based parser is brittle to phrasing (held-out 11/14), but it fails safe by declining. |
+| **Three reasoners behind one interface** (Claude, Gemini, rule-based) | Reproducible evals and keyless operation (a requirement for "reasonably deterministic execution" and a runnable suite), a baseline to compare LLMs against, and no lock-in to one model provider. Adding Gemini took one ~200-line class; the graph, tools, guardrails and evals were untouched. | The rule-based parser is brittle to phrasing (held-out 11/14), but it fails safe by declining. Each LLM provider needs its own message/tool plumbing. |
 | **Determinism strategy** | Current Claude models reject `temperature`, so determinism comes from the architecture: deterministic tools, stable evidence IDs, verifier, templated action status. Rule mode is byte-identical across runs. | Claude answers vary in wording; the evals check outcomes, not exact text. |
 | **Policy engine recomputes evidence** | A model's justification is not evidence. Recomputing makes "refuse actions without sufficient evidence" enforceable and auditable. | The rules are explicit and conservative; edge cases need policy changes, not prompting. |
 | **Proposal and execution split**, with re-check at execution | Allows human review with full evidence, and protects against stale approvals (tested with two concurrent sessions). | One extra round-trip per action. |

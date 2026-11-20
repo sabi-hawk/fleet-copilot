@@ -46,6 +46,24 @@ def test_eval_catches_hallucinated_citation(monkeypatch, tmp_path):
     assert summary["grounding"]["answers_fallback_evidence_only"] == 1
 
 
+def test_provider_quota_exhaustion_is_reported_as_not_run(monkeypatch, tmp_path):
+    from fleet_copilot.agent.reasoners.gemini import QuotaExhausted
+
+    class QuotaReasoner(RuleBasedReasoner):
+        name = "quota"
+
+        def plan(self, state, rctx):
+            raise QuotaExhausted("Gemini daily quota exhausted for test-model (FreeTier / 20)")
+
+    only = ["qa-low-disk-acme", "qa-low-disk-globex", "gr-cross-tenant-company-name"]
+    summary, res = _run(monkeypatch, tmp_path, QuotaReasoner, only)
+    # the guard-refused case never reaches the model and is scored normally; the others are excluded, not failed
+    assert res["gr-cross-tenant-company-name"]["passed"] or res["gr-cross-tenant-company-name"].get("skipped")
+    assert summary["not_run_quota"]["count"] >= 2
+    assert all(r.get("skipped") for k, r in res.items() if k.startswith("qa-"))
+    assert summary["cases"] == 3 - summary["not_run_quota"]["count"]
+
+
 def test_eval_catches_skipped_human_approval(monkeypatch, tmp_path):
     import fleet_copilot.agent.graph as graph
 

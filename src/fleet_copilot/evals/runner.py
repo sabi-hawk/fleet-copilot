@@ -16,6 +16,7 @@ import hashlib
 import json
 import re
 import statistics
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
@@ -211,6 +212,8 @@ def evaluate_case(case: dict[str, Any], run: dict[str, Any], store: TelemetrySto
 
 
 def summarize(results: list[dict[str, Any]], audit_ok: tuple[bool, int, str], determinism: dict[str, Any] | None) -> dict[str, Any]:
+    skipped = [r for r in results if r.get("skipped")]
+    results = [r for r in results if not r.get("skipped")]
     n = len(results)
     by_cat: dict[str, list[bool]] = {}
     for r in results:
@@ -266,6 +269,9 @@ def summarize(results: list[dict[str, Any]], audit_ok: tuple[bool, int, str], de
     }
     if determinism:
         summary["determinism"] = determinism
+    if skipped:
+        summary["not_run_quota"] = {"count": len(skipped), "cases": [r["id"] for r in skipped],
+                                    "note": "provider quota exhausted; these cases are excluded from every metric"}
     return summary
 
 
@@ -277,7 +283,8 @@ def write_report(out_dir: Path, reasoner: str, summary: dict[str, Any], results:
     model = summary.get("model")
     lines = [f"# Fleet Copilot evaluation report ({reasoner} reasoner{', model ' + model if model else ''})", "",
              f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}. **{s['passed']}/{s['cases']} cases passed "
-             f"({s['pass_rate']:.1%}).**", "", "## By category", "", "| Category | Passed | Total | Pass rate |", "|---|---|---|---|"]
+             f"({s['pass_rate']:.1%}).**" + (f" {s['not_run_quota']['count']} case(s) NOT RUN (provider quota exhausted) and excluded."
+                                              if s.get("not_run_quota") else ""), "", "## By category", "", "| Category | Passed | Total | Pass rate |", "|---|---|---|---|"]
     for k, v in s["by_category"].items():
         lines.append(f"| {k} | {v['passed']} | {v['total']} | {v['pass_rate']:.1%} |")
     gq, gr, gd = s["grounded_qa"], s["guardrails"], s["grounding"]
@@ -303,7 +310,8 @@ def write_report(out_dir: Path, reasoner: str, summary: dict[str, Any], results:
     lines += ["", "## Cases", "", "| Case | Category | Tenant | Result | Failed checks |", "|---|---|---|---|---|"]
     for r in results:
         failed = "; ".join(f"{c['check']}: {c['detail']}" for c in r["checks"] if not c["passed"])
-        lines.append(f"| {r['id']} | {r['category']} | {r['tenant']} | {'PASS' if r['passed'] else 'FAIL'} | {failed.replace('|', '/')[:300]} |")
+        verdict = "NOT RUN (quota)" if r.get("skipped") else ("PASS" if r["passed"] else "FAIL")
+        lines.append(f"| {r['id']} | {r['category']} | {r['tenant']} | {verdict} | {failed.replace('|', '/')[:300]} |")
     (out_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -327,9 +335,21 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
         run_dir = out / f"run{rep + 1}"
         s = replace(settings, home=run_dir)
         audit = AuditLog(audit_path)
+        quota_hit = threading.Event()
         def one(case: dict[str, Any]) -> dict[str, Any]:
+            if quota_hit.is_set():  # provider quota exhausted: record as not run instead of a fake failure
+                if progress:
+                    print(f"  [SKIP] {case['id']} (provider quota exhausted)", flush=True)
+                return {"id": case["id"], "category": case["category"], "tenant": case["tenant"], "file": case["_file"],
+                        "status": "skipped_quota", "passed": False, "skipped": True, "checks": [], "metrics": {},
+                        "elapsed_s": 0.0, "answer": None, "plan": None, "tool_calls": [], "proposals": [],
+                        "answer_sha256": None, "error": "not run: provider quota exhausted",
+                        "expected_status": case.get("expect", {}).get("status", "answered"), "question": case.get("question")}
             cr = CaseRun(case, store, s, audit, run_dir, reasoner, client)
             run = cr.run()
+            if run["error"] and "QuotaExhausted" in run["error"]:
+                quota_hit.set()
+                return one(case)
             ev = evaluate_case(case, run, store, audit, cr.actions)
             res = run["result"]
             if progress:
@@ -377,7 +397,7 @@ def main(reasoner: str = "rule", suite_dir: str | None = None, out_dir: str | No
         d = summary["determinism"]
         print(f"  determinism: {d['identical']}/{d['cases']} identical answers across {d['repeats']} runs")
     for r in results:
-        if not r["passed"]:
+        if not r["passed"] and not r.get("skipped"):
             failed = [f"{c['check']} ({c['detail']})" for c in r["checks"] if not c["passed"]]
             print(f"  FAIL {r['id']}: {'; '.join(failed)[:300]}")
     print(f"Report: {out / 'report.md'}")
