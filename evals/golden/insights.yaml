@@ -1,0 +1,113 @@
+# Insight & trend detection over the 30-day window. devices_include = must be found (recall);
+# devices_exclude = must NOT be reported (precision). Gold sets from the raw time series:
+# - battery EOL: condition 'Service Recommended' + steady full_charge_capacity fade (-4.2%) on 3 Acme devices only
+# - RAM: >=85% used in 30/30 (M4XVHUV1MEPZ, I3JLKILKQTAC) and 23/30 (JRZSGXVMKE6M); CUXW0BQSV1B7 13/30 is intermittent
+# - storage: six devices declining linearly to ~2% free
+# - drift: screen_lock pass->fail on 10 devices; os_up_to_date fails all window on 19 devices
+
+- id: ins-battery-acme
+  category: insights
+  tenant: acme-001
+  question: Which batteries are approaching end-of-life?
+  expect:
+    devices_include: [7VP16KHV88LM, 8NM23J95R5I6, M4XVHUV1MEPZ]
+    devices_exclude: [1LYSSFD074BB, 9MXJVZ1I0DKA, DSYPSES7SKBB, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC, DLT35MHGTH2D]
+    tools_any: [detect_battery_health, run_fleet_health_scan]
+
+- id: ins-battery-globex
+  category: insights
+  tenant: globex-002
+  question: Are any batteries approaching end-of-life?
+  expect:
+    devices_exact: []
+    must_contain_any: ["no ", "none", "0 "]
+    tools_any: [detect_battery_health, run_fleet_health_scan]
+
+- id: ins-ram-acme
+  category: insights
+  tenant: acme-001
+  question: Which devices are consistently constrained by RAM?
+  expect:
+    devices_include: [M4XVHUV1MEPZ]
+    devices_exclude: [1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DLT35MHGTH2D, DSYPSES7SKBB, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC]
+    tools_any: [detect_memory_pressure, run_fleet_health_scan, get_metric_history]
+
+- id: ins-ram-globex
+  category: insights
+  tenant: globex-002
+  question: Which devices are consistently constrained by RAM?
+  expect:
+    devices_include: [JRZSGXVMKE6M]
+    devices_exclude: [4SEFDLPTKXAM, DXUCJ272DCYX, E4V0SB5I0MYU, IZ6K51CBZR8F, Q1AFVLH3YV33, QPZSXKINA7GP]
+    tools_any: [detect_memory_pressure, run_fleet_health_scan, get_metric_history]
+
+- id: ins-ram-initech
+  category: insights
+  tenant: initech-003
+  question: Which devices are consistently constrained by RAM?
+  expect:
+    devices_include: [I3JLKILKQTAC]
+    devices_exclude: [2MAN6T4DJD95, DARFCP0BQM2G, RLD7WV7J82SH, SPKRRDF0L786, W2656QDAE2ZJ, XZYK11QTPWEC]
+    tools_any: [detect_memory_pressure, run_fleet_health_scan, get_metric_history]
+
+- id: ins-storage-acme
+  category: insights
+  tenant: acme-001
+  question: Which devices are consistently low on storage?
+  expect:
+    devices_include: [8NM23J95R5I6, MT7PJB7N5LRE]
+    devices_exclude: [1LYSSFD074BB, 7VP16KHV88LM, 9MXJVZ1I0DKA, DLT35MHGTH2D, DSYPSES7SKBB, M4XVHUV1MEPZ, Q3VUITEGQ400, XSU9UUDGU6AC]
+    tools_any: [detect_storage_pressure, run_fleet_health_scan]
+
+- id: ins-storage-globex
+  category: insights
+  tenant: globex-002
+  question: Which devices are consistently low on storage?
+  expect:
+    devices_include: [E4V0SB5I0MYU, JRZSGXVMKE6M]
+    devices_exclude: [4SEFDLPTKXAM, CUXW0BQSV1B7, DXUCJ272DCYX, IZ6K51CBZR8F, Q1AFVLH3YV33, QPZSXKINA7GP]
+    tools_any: [detect_storage_pressure, run_fleet_health_scan]
+
+- id: ins-storage-initech
+  category: insights
+  tenant: initech-003
+  question: Which devices are consistently low on storage over time?
+  expect:
+    devices_include: [DARFCP0BQM2G, RLD7WV7J82SH]
+    devices_exclude: [2MAN6T4DJD95, I3JLKILKQTAC, SPKRRDF0L786, W2656QDAE2ZJ, XZYK11QTPWEC]
+    tools_any: [detect_storage_pressure, run_fleet_health_scan]
+
+- id: ins-drift-acme
+  category: insights
+  tenant: acme-001
+  question: Is there any compliance drift over time in our fleet?
+  expect:
+    devices_include: [1LYSSFD074BB, 8NM23J95R5I6, DLT35MHGTH2D, DSYPSES7SKBB, MT7PJB7N5LRE]
+    must_contain: ["screen_lock"]
+    tools_any: [detect_compliance_drift, run_fleet_health_scan]
+
+- id: ins-drift-initech
+  category: insights
+  tenant: initech-003
+  question: Show me compliance drift over time.
+  expect:
+    devices_include: [2MAN6T4DJD95, SPKRRDF0L786, XZYK11QTPWEC]
+    must_contain: ["screen_lock"]
+    tools_any: [detect_compliance_drift, run_fleet_health_scan]
+
+- id: ins-software-initech
+  category: insights
+  tenant: initech-003
+  question: Has any new software appeared on our devices during the period?
+  expect:
+    devices_include: [DARFCP0BQM2G, I3JLKILKQTAC, W2656QDAE2ZJ]
+    must_contain: ["uTorrent", "TeamViewer"]
+    tools_any: [detect_software_changes, run_fleet_health_scan, search_installed_software]
+
+- id: ins-scan-acme
+  category: insights
+  tenant: acme-001
+  question: What are the most important issues in my fleet right now?
+  expect:
+    devices_include: [8NM23J95R5I6, MT7PJB7N5LRE, 7VP16KHV88LM, M4XVHUV1MEPZ]
+    tools_any: [run_fleet_health_scan, detect_storage_pressure, detect_battery_health]

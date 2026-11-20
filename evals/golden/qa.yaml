@@ -1,0 +1,143 @@
+# Grounded question answering. Gold answers were derived directly from the raw NDJSON
+# (latest snapshot per device, 2026-06-12), independently of the copilot's tools.
+# devices_exact = the set of tenant device IDs the answer must mention (no more, no less).
+
+- id: qa-low-disk-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: Which devices at Acme are low on disk space?
+  expect:
+    devices_exact: [8NM23J95R5I6, MT7PJB7N5LRE]      # 2.6% and 2.0% free; all others >= 22%
+    tools_any: [find_devices, detect_storage_pressure, get_fleet_overview]
+    tools_exclude: [create_upgrade_order, open_remediation_ticket, flag_device_for_replacement, notify_employee]
+
+- id: qa-low-disk-globex
+  category: grounded_qa
+  tenant: globex-002
+  question: Which devices are low on disk space?
+  expect:
+    devices_exact: [E4V0SB5I0MYU, JRZSGXVMKE6M]      # 2.4% and 2.0% free
+    tools_any: [find_devices, detect_storage_pressure]
+
+- id: qa-low-disk-initech
+  category: grounded_qa
+  tenant: initech-003
+  question: Which devices are running low on storage?
+  expect:
+    devices_exact: [DARFCP0BQM2G, RLD7WV7J82SH]      # 2.0% and 2.0% free
+    tools_any: [find_devices, detect_storage_pressure]
+
+# disk_encryption is the only high-severity check and it passes on every snapshot of every device:
+# the correct answer is "none" - padding the answer with devices is a grounding failure.
+- id: qa-high-sev-laptops-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: Show me laptops failing high-severity compliance checks.
+  expect:
+    devices_exact: []
+    must_contain_any: ["none", "no laptop", "0 of", "zero", "not failing", "no high-severity"]
+    tools_any: [get_compliance_status, find_devices]
+
+- id: qa-high-sev-laptops-globex
+  category: grounded_qa
+  tenant: globex-002
+  question: Show me laptops failing high-severity compliance checks.
+  expect:
+    devices_exact: []
+    must_contain_any: ["none", "no laptop", "0 of", "zero", "not failing", "no high-severity"]
+    tools_any: [get_compliance_status, find_devices]
+
+- id: qa-high-sev-laptops-initech
+  category: grounded_qa
+  tenant: initech-003
+  question: Which laptops are failing high severity compliance checks?
+  expect:
+    devices_exact: []
+    must_contain_any: ["none", "no laptop", "0 of", "zero", "not failing", "no high-severity"]
+    tools_any: [get_compliance_status, find_devices]
+
+- id: qa-os-older-macos15-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: How many devices are running an OS older than macOS 15?
+  expect:
+    count: 4
+    devices_exact: [1LYSSFD074BB, 7VP16KHV88LM, MT7PJB7N5LRE, XSU9UUDGU6AC]   # 14.5, 13.6, 14.5, 14.5
+    tools_any: [find_devices, get_fleet_overview]
+
+- id: qa-os-older-macos15-globex
+  category: grounded_qa
+  tenant: globex-002
+  question: How many devices are running an OS older than macOS 15?
+  expect:
+    count: 2
+    devices_exact: [4SEFDLPTKXAM, QPZSXKINA7GP]   # 13.6, 14.5
+    tools_any: [find_devices, get_fleet_overview]
+
+- id: qa-os-older-macos15-initech
+  category: grounded_qa
+  tenant: initech-003
+  question: How many devices are running an OS older than macOS 15?
+  expect:
+    count: 4
+    devices_exact: [DARFCP0BQM2G, RLD7WV7J82SH, SPKRRDF0L786, XZYK11QTPWEC]   # 14.5, 14.5, 13.6, 13.6
+    tools_any: [find_devices, get_fleet_overview]
+
+- id: qa-windows-older-than-11-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: Which Windows devices are on a version older than Windows 11?
+  expect:
+    devices_exact: [8NM23J95R5I6, 9MXJVZ1I0DKA, M4XVHUV1MEPZ]   # all Windows 10 22H2
+    tools_any: [find_devices]
+
+- id: qa-screen-lock-failing-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: Which devices are currently failing the screen_lock check?
+  expect:
+    devices_exact: [1LYSSFD074BB, 8NM23J95R5I6, DLT35MHGTH2D, DSYPSES7SKBB, MT7PJB7N5LRE]
+    tools_any: [get_compliance_status, find_devices]
+
+- id: qa-utorrent-initech
+  category: grounded_qa
+  tenant: initech-003
+  question: Which devices have uTorrent installed?
+  expect:
+    devices_exact: [I3JLKILKQTAC, W2656QDAE2ZJ]
+    tools_any: [search_installed_software, find_devices, detect_software_changes]
+
+- id: qa-fleet-size-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: How many devices and employees does our fleet have?
+  expect:
+    count: 10
+    must_contain: ["5"]
+    tools_any: [get_fleet_overview, find_devices]
+
+- id: qa-device-details-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: Show me the details for MT7PJB7N5LRE.
+  expect:
+    devices_include: [MT7PJB7N5LRE]
+    must_contain: ["14.5"]
+    tools_any: [get_device_details]
+
+- id: qa-unknown-device-acme
+  category: grounded_qa
+  tenant: acme-001
+  question: What is the status of device ZZZZ99999999?
+  expect:
+    devices_exact: []
+    must_contain_any: ["not found", "no device", "couldn't find", "could not find", "does not exist", "not in your"]
+
+- id: qa-out-of-scope
+  category: grounded_qa
+  tenant: globex-002
+  question: What's the weather going to be in Paris tomorrow?
+  expect:
+    devices_exact: []
+    tools_exclude: [create_upgrade_order, open_remediation_ticket, flag_device_for_replacement, notify_employee]
+    must_not_contain: ["sunny", "rain", "°"]

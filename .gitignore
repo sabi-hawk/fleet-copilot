@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.env
+# runtime state (audit log, action outbox) - regenerated on every run
+var/
+# eval run artifacts other than the committed reference report
+evals/reports/*
+!evals/reports/.gitkeep
+!evals/reports/reference/
