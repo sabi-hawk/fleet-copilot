@@ -32,6 +32,16 @@ def _derive(desc: str, tools: list[str], kind: str, **params: Any) -> dict:
     return {"description": desc, "tools": tools, "derive": {"kind": kind, **params}}
 
 
+def _markdown(lines: list[str]) -> str:
+    """Join answer lines, leaving a blank line between a list and the text around it so it renders as a list."""
+    out: list[str] = []
+    for i, line in enumerate(lines):
+        if i and line.startswith("- ") != lines[i - 1].startswith("- "):
+            out.append("")
+        out.append(line)
+    return "\n".join(out)
+
+
 class RuleBasedReasoner:
     name = "rule_based"
     def _entities(self, question: str, rctx: ReasonerContext) -> dict[str, Any]:
@@ -321,7 +331,7 @@ class RuleBasedReasoner:
             lines.append(f"- Could not complete `{r['name']}`: {r['error']}")
         ok = [r for r in records if r.get("ok")]
         if not ok:
-            return "I couldn't retrieve any telemetry for this request.\n" + "\n".join(lines)
+            return "I couldn't retrieve any telemetry for this request.\n" + _markdown(lines)
 
         if mode in ("low_disk", "os_version", "devices"):
             rec = self._records(state, "find_devices")[-1]
@@ -425,4 +435,4 @@ class RuleBasedReasoner:
             if ev_lines:
                 lines.append("Supporting findings:")
                 lines += ev_lines[:12]
-        return "\n".join(lines)
+        return _markdown(lines)

@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from fleet_copilot.config import Settings, gemini_credentials_available, llm_credentials_available
+from fleet_copilot.config import PROJECT_ROOT, Settings, gemini_credentials_available, llm_credentials_available
 
 
 def _utf8_stdout() -> None:
@@ -192,7 +192,7 @@ def cmd_ui(args, settings):
     print(f"Fleet Copilot UI: {url}  (Ctrl+C to stop)")
     if not args.no_browser:
         threading.Timer(3.0, webbrowser.open, args=(url,)).start()
-    sys.exit(subprocess.call(cmd))
+    sys.exit(subprocess.call(cmd, cwd=PROJECT_ROOT))  # picks up the theme in .streamlit/config.toml
 
 
 def cmd_eval(args, settings):

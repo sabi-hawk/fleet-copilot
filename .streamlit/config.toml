@@ -1,0 +1,46 @@
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap, sans-serif"
+codeFont = "JetBrains Mono:https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap, monospace"
+baseFontSize = 15
+headingFontWeights = [700, 650, 600, 600, 600, 600]
+baseRadius = "0.7rem"
+buttonRadius = "0.55rem"
+showWidgetBorder = true
+showSidebarBorder = true
+chartCategoricalColors = ["#4F46E5", "#0EA5E9", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"]
+
+[theme.light]
+primaryColor = "#4F46E5"
+backgroundColor = "#F6F7FB"
+secondaryBackgroundColor = "#ECEFF7"
+textColor = "#0F172A"
+borderColor = "#DDE2EE"
+linkColor = "#4338CA"
+codeBackgroundColor = "#EEF0F8"
+dataframeHeaderBackgroundColor = "#F1F3F9"
+
+[theme.light.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F5FA"
+borderColor = "#E3E7F0"
+
+[theme.dark]
+primaryColor = "#818CF8"
+backgroundColor = "#0B1020"
+secondaryBackgroundColor = "#161D31"
+textColor = "#E6E9F2"
+borderColor = "#27304A"
+linkColor = "#A5B4FC"
+codeBackgroundColor = "#141A2C"
+dataframeHeaderBackgroundColor = "#141A2C"
+
+[theme.dark.sidebar]
+backgroundColor = "#0E1426"
+secondaryBackgroundColor = "#161D31"
+borderColor = "#222A42"
