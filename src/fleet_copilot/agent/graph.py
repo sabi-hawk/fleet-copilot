@@ -61,8 +61,10 @@ def action_status_section(proposals: list[dict[str, Any]]) -> str:
         elif st == "pending_approval":
             lines.append(f"{head}: policy passed{cite}; AWAITING administrator approval. Not executed.")
         elif st == "rejected_by_approver":
-            who = p.get("approval", {}).get("approver") or "no approver identity supplied"
-            lines.append(f"{head}: policy passed{cite}; REJECTED by approver ({who}). Not executed.")
+            approval = p.get("approval", {})
+            who = approval.get("approver") or "no approver identity supplied"
+            why = f": {approval['reason']}" if approval.get("reason") else ""
+            lines.append(f"{head}: policy passed{cite}; REJECTED by approver ({who}){why}. Not executed.")
         elif st == "executed":
             ex = p["execution"]
             lines.append(f"{head}: policy passed{cite}; APPROVED by {p['approval']['approver']}; executed as {ex['record_id']}"
@@ -199,7 +201,13 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
         response = interrupt(request) or {}
         approver = str(response.get("approver") or "").strip()
         decisions = response.get("decisions") or {}
-        valid_approver = bool(approver) and approver.lower() not in NON_HUMAN_APPROVERS
+        foreign = deps.guard.foreign_references(approver)
+        valid_approver = bool(approver) and approver.lower() not in NON_HUMAN_APPROVERS and not foreign
+        if foreign:
+            log("security_event", {"type": "approver_from_other_organization", "approver": approver, "matches": foreign},
+                actor=approver)
+        reason = None if valid_approver else (f"approver '{approver}' belongs to another organization" if foreign
+                                              else "no valid human approver identity supplied")
         at = _now()
         proposals = []
         for p in state.get("proposals", []):
@@ -207,7 +215,6 @@ def build_graph(deps: AgentDeps, checkpointer: Any):
             if p["status"] == "pending_approval":
                 raw = str(decisions.get(p["proposal_id"], "reject")).lower()
                 approve = valid_approver and raw in APPROVE_WORDS
-                reason = None if valid_approver else "no valid human approver identity supplied"
                 p["approval"] = {"decision": "approve" if approve else "reject", "approver": approver or None, "at": at,
                                  "reason": reason}
                 p["status"] = "approved" if approve else "rejected_by_approver"

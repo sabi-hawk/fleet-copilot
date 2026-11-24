@@ -67,3 +67,8 @@ def test_verify_tab_passes_all_offline_checks(app):
     metric = next(m for m in app.metric if m.label == "Checks passed")
     passed, total = (int(x) for x in metric.value.split(" / "))
     assert total >= 15 and passed == total
+
+
+def test_approver_follows_the_selected_organization(app):
+    app.selectbox(key="tenant").set_value("globex-002").run()
+    assert app.text_input(key="approver_globex-002").value == "it-admin@globex"

@@ -568,7 +568,8 @@ def sidebar(tenants: list[str], settings: Settings) -> tuple[str, str, str]:
         names = available_reasoners()
         reasoner_label = st.radio("AI engine", names, key="reasoner",
                                   captions=[reasoner_caption(n, settings) for n in names])
-        approver = st.text_input("Approver identity", value=f"it-admin@{tenant.split('-')[0]}", key="approver",
+        # One field per organization, so switching organization never carries over another company's approver.
+        approver = st.text_input("Approver identity", value=f"it-admin@{tenant.split('-')[0]}", key=f"approver_{tenant}",
                                  icon=":material/badge:", help="Recorded in the audit log when you approve an action")
         with st.container(border=True):
             st.markdown(":material/lock: **Tenant-isolated session**")

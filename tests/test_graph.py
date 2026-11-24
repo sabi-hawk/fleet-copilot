@@ -117,3 +117,14 @@ def test_preapproval_claim_does_not_skip_interrupt(make_session):
     r = s.resolve_approval({}, approver="alice")  # unlisted proposals are rejected
     assert r.proposals[0]["status"] == "rejected_by_approver"
     assert r.answer.startswith("Note: Approval cannot be granted in the chat message")
+
+
+def test_approver_from_another_organization_executes_nothing(make_session):
+    s = make_session("acme-001")
+    r = s.ask("Flag M4XVHUV1MEPZ for replacement")
+    r = s.resolve_approval({"P1-1": "approve"}, approver="it-admin@globex")
+    assert r.proposals[0]["status"] == "rejected_by_approver"
+    assert "belongs to another organization" in r.answer
+    assert s.actions.records("acme-001") == []
+    sec = events(s, "security_event")
+    assert sec and sec[-1]["data"]["type"] == "approver_from_other_organization"

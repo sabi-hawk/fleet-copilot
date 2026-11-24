@@ -63,6 +63,13 @@ class InputGuard:
     def foreign_identifiers(self) -> set[str]:
         return set(self._foreign_ids) | set(self._foreign_names)
 
+    def foreign_references(self, text: str) -> list[str]:
+        """Other organizations' names and identifiers mentioned in the text."""
+        low = (text or "").lower()
+        hits = [n for n in self._foreign_names if re.search(rf"\b{re.escape(n.lower())}\b", low)]
+        hits += sorted(i for i in self._foreign_ids if re.search(rf"(?<![\w-]){re.escape(i.lower())}(?![\w-])", low))
+        return hits
+
     def check(self, question: str) -> GuardDecision:
         q = (question or "").strip()
         if not q:
@@ -71,8 +78,7 @@ class InputGuard:
             return GuardDecision(False, "too_long", f"The question exceeds {MAX_QUESTION_CHARS} characters.")
         low = q.lower()
 
-        hits = [n for n in self._foreign_names if re.search(rf"\b{re.escape(n.lower())}\b", low)]
-        hits += sorted(i for i in self._foreign_ids if re.search(rf"(?<![\w-]){re.escape(i.lower())}(?![\w-])", low))
+        hits = self.foreign_references(q)
         hits += [m.group(0) for p in CROSS_TENANT_PHRASES for m in [re.search(p, low)] if m]
         if hits:
             return GuardDecision(
