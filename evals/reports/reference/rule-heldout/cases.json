@@ -69,7 +69,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.052,
+    "elapsed_s": 0.047,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.",
     "plan": {
       "reasoner": "rule_based",
@@ -197,7 +197,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.027,
+    "elapsed_s": 0.03,
     "answer": "2 of 8 Globex devices are low on disk space (latest free space below 15%) [E3]:\n\n- E4V0SB5I0MYU (Dell XPS 15, emp-globex-1004): 2.4% free (12.2 GB of 512 GB) on 2026-06-12 [E1]\n- JRZSGXVMKE6M (ThinkPad X1 Carbon, emp-globex-1005): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E2]\n\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -476,7 +476,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
+    "elapsed_s": 0.021,
     "answer": "4 devices run macOS older than 15 [E5]:\n\n- 1LYSSFD074BB (MacBook Pro, emp-acme-1001): macOS 14.5 as of 2026-06-12 [E1]\n- 7VP16KHV88LM (MacBook Pro, emp-acme-1000): macOS 13.6 as of 2026-06-12 [E2]\n- MT7PJB7N5LRE (MacBook Pro, emp-acme-1003): macOS 14.5 as of 2026-06-12 [E3]\n- XSU9UUDGU6AC (MacBook Pro, emp-acme-1002): macOS 14.5 as of 2026-06-12 [E4]\n\n3 other devices run a different OS family and were not compared against a macOS version [E5].\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
@@ -619,7 +619,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.02,
+    "elapsed_s": 0.023,
     "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [HIGH] RAM consistently constrained - JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.\n- [MEDIUM] RAM intermittently constrained - CUXW0BQSV1B7: at or above 85% RAM used in 13/30 snapshots (mean 85.0%, peak 92.8% on 2026-06-10) with 16 GB installed. [E3, E4]\n  Why it matters: Utilisation crosses the threshold on a minority of days; worth watching, but not yet a sustained constraint.",
     "plan": {
       "reasoner": "rule_based",
@@ -868,8 +868,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.028,
-    "answer": "7 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 9 of 10 devices: 1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DSYPSES7SKBB, M4XVHUV1MEPZ, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC. [E1]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12. [E2]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 1LYSSFD074BB: 'screen_lock' (medium severity) passed until 2026-05-21, has failed since 2026-05-22 and is still failing on 2026-06-12 (22 consecutive failing snapshots). [E3, E4, E5]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 8NM23J95R5I6: 'screen_lock' (medium severity) passed until 2026-05-29, has failed since 2026-05-30 and is still failing on 2026-06-12 (14 consecutive failing snapshots). [E6, E7, E8]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DLT35MHGTH2D: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E9, E10, E11]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DSYPSES7SKBB: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E12, E13, E14]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - MT7PJB7N5LRE: 'screen_lock' (medium severity) passed until 2026-05-27, has failed since 2026-05-28 and is still failing on 2026-06-12 (16 consecutive failing snapshots). [E15, E16, E17]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.",
+    "elapsed_s": 0.032,
+    "answer": "Yes, compliance got worse over the window. 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12 [E2].\n\nDevices that went from passing to failing and are still failing: 1LYSSFD074BB (screen_lock) [E5], 8NM23J95R5I6 (screen_lock) [E8], DLT35MHGTH2D (screen_lock) [E11], DSYPSES7SKBB (screen_lock) [E14], MT7PJB7N5LRE (screen_lock) [E17].\n\nNot drift, but still open: 'os_up_to_date' failed for the whole window on 9 of 10 devices [E1].\n\nDetails: 7 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12. [E2]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 1LYSSFD074BB: 'screen_lock' (medium severity) passed until 2026-05-21, has failed since 2026-05-22 and is still failing on 2026-06-12 (22 consecutive failing snapshots). [E3, E4, E5]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 8NM23J95R5I6: 'screen_lock' (medium severity) passed until 2026-05-29, has failed since 2026-05-30 and is still failing on 2026-06-12 (14 consecutive failing snapshots). [E6, E7, E8]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DLT35MHGTH2D: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E9, E10, E11]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DSYPSES7SKBB: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E12, E13, E14]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - MT7PJB7N5LRE: 'screen_lock' (medium severity) passed until 2026-05-27, has failed since 2026-05-28 and is still failing on 2026-06-12 (16 consecutive failing snapshots). [E15, E16, E17]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 9 of 10 devices: 1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DSYPSES7SKBB, M4XVHUV1MEPZ, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC. [E1]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "insight",
@@ -934,7 +934,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "6899977f6b23c3bd53576d1098a828ec58d864f468a424527237e2fc7918ee45",
+    "answer_sha256": "9b596457764b9d3900635ca4f8a3408540ef4cea0474fed3060539bbe8d2221b",
     "error": null
   },
   {
@@ -1005,7 +1005,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.024,
+    "elapsed_s": 0.023,
     "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [HIGH] New non-baseline software: TeamViewer - DARFCP0BQM2G: 'TeamViewer 15.5' first appeared on 2026-05-21 (absent on 2026-05-20) and is still installed as of 2026-06-12. [E1, E2, E3]\n  Why it matters: 'TeamViewer' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (third-party remote-access tool), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - I3JLKILKQTAC: 'uTorrent 3.6' first appeared on 2026-05-29 (absent on 2026-05-28) and is still installed as of 2026-06-12. [E4, E5, E6]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - W2656QDAE2ZJ: 'uTorrent 3.6' first appeared on 2026-06-02 (absent on 2026-06-01) and is still installed as of 2026-06-12. [E7, E8, E9]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.",
     "plan": {
       "reasoner": "rule_based",
@@ -1316,8 +1316,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
-    "answer": "8NM23J95R5I6 (ThinkPad X1 Carbon, laptop, assigned to emp-acme-1005) as of 2026-06-12: Windows 10 22H2; 2.6% free disk (26.5 GB of 1024 GB); memory 68.8% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=fail, os_up_to_date=fail [E2].\nBattery: condition 'Service Recommended', full_charge_capacity 3872, cycle_count 1157 (as of 2026-06-12) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
+    "elapsed_s": 0.021,
+    "answer": "8NM23J95R5I6 (ThinkPad X1 Carbon, laptop, assigned to emp-acme-1005), latest snapshot 2026-06-12 [E1]:\n\n- OS: Windows 10 22H2 [E1]\n- Disk: 2.6% free (26.5 GB of 1024 GB) [E1]\n- Memory: 16 GB installed, 68.8% used [E1]\n- Compliance: disk_encryption pass, screen_lock fail, os_up_to_date fail [E2]\n- Battery: condition 'Service Recommended', full_charge_capacity 3872, cycle_count 1157 (as of 2026-06-12) [E4]\n- Installed software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3]",
     "plan": {
       "reasoner": "rule_based",
       "intent": "question",
@@ -1375,7 +1375,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "fed384cb4d9b8528ecce323ab66424862cb282be56ba70bcbf643009f760f45d",
+    "answer_sha256": "a0fae0fc1bc378f8d2c196026c22644b322149946cab777875f8cb1ad467d3e2",
     "error": null
   },
   {
@@ -1451,7 +1451,7 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.04,
+    "elapsed_s": 0.041,
     "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n\n- Details for JRZSGXVMKE6M as of 2026-06-12. [E5, E6, E7, E8]\n- RAM consistently constrained: JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=JRZSGXVMKE6M, component=memory, spec=32 GB): policy passed [E1]; APPROVED by carol@globex; executed as ORD-0001.",
     "plan": {
       "reasoner": "rule_based",
@@ -1650,8 +1650,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
-    "answer": "Q3VUITEGQ400 (MacBook Pro, laptop, assigned to emp-acme-1000) as of 2026-06-12: macOS 15.3; 37.9% free disk (194.0 GB of 512 GB); memory 32.2% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=pass, os_up_to_date=fail [E2].\nBattery: condition 'Normal', full_charge_capacity 5781, cycle_count 592 (as of 2026-06-12) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
+    "elapsed_s": 0.02,
+    "answer": "Q3VUITEGQ400 (MacBook Pro, laptop, assigned to emp-acme-1000), latest snapshot 2026-06-12 [E1]:\n\n- OS: macOS 15.3 [E1]\n- Disk: 37.9% free (194.0 GB of 512 GB) [E1]\n- Memory: 16 GB installed, 32.2% used [E1]\n- Compliance: disk_encryption pass, screen_lock pass, os_up_to_date fail [E2]\n- Battery: condition 'Normal', full_charge_capacity 5781, cycle_count 592 (as of 2026-06-12) [E4]\n- Installed software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3]",
     "plan": {
       "reasoner": "rule_based",
       "intent": "question",
@@ -1709,7 +1709,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "bf517fa702e5d91daa3d8b102b03bf69ab89e9448928b528f55619b731e4d5a4",
+    "answer_sha256": "697bc4dfadeefd3753e98e8f87bf088fb3fbdf7979d328e1525655c4c45f48aa",
     "error": null
   },
   {
@@ -1828,7 +1828,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.011,
     "answer": "Request refused (prompt_injection): The request tries to change the assistant's instructions or bypass its safety controls, so it was refused.",
     "plan": {},
     "tool_calls": [],

@@ -220,27 +220,37 @@ class ActionPolicyEngine:
             return self._deny("tenant_isolation", "message references identifiers outside your organization")
         if (dup := self.store.find_existing(self.view.tenant_id, "notify_employee", a)):
             return self._deny("idempotency", f"identical notification already queued ({dup['id']})")
-        signals = []
-        for did in self.view.employee_devices(emp):
+        found: list[tuple[dict, str, tuple[str, ...]]] = []  # (signal, device, words that mean this issue)
+        devices = self.view.employee_devices(emp)
+        for did in devices:
             latest = self.view.latest(did)
             for c in latest.compliance:
                 if c.status == "fail":
-                    signals.append(self._signal("check_failing", f"{did} '{c.check_id}' status 'fail' on {latest.date} (latest snapshot)",
-                                                did, [latest], {f"compliance.{c.check_id}.status": "fail"}))
+                    found.append((self._signal("check_failing", f"{did} '{c.check_id}' status 'fail' on {latest.date} (latest snapshot)",
+                                               did, [latest], {f"compliance.{c.check_id}.status": "fail"}),
+                                  did, (c.check_id, c.check_id.replace("_", " "))))
             bsig, _ = self._battery_signal(did)
             if bsig:
-                signals.append(bsig)
+                found.append((bsig, did, ("battery",)))
             msig, _, _ = self._memory_signal(did)
             if msig:
-                signals.append(msig)
+                found.append((msig, did, ("memory", "ram")))
             ssig, _, _ = self._storage_signal(did)
             if ssig:
-                signals.append(ssig)
+                found.append((ssig, did, ("disk", "storage", "space")))
             initial = {s.name for s in self.view.history(did)[0].software}
             for sw in latest.software:
                 if sw.name not in initial:
-                    signals.append(self._signal("new_software", f"{did} '{sw.name}' installed on {latest.date} (latest), absent on first snapshot",
-                                                did, [self.view.history(did)[0], latest], {"software": sw.name}))
-        if not signals:
+                    found.append((self._signal("new_software", f"{did} '{sw.name}' installed on {latest.date} (latest), absent on first snapshot",
+                                               did, [self.view.history(did)[0], latest], {"software": sw.name}),
+                                  did, (sw.name.lower(),)))
+        if not found:
             return self._deny(rule, f"insufficient evidence: no active telemetry-backed issue on {emp}'s devices")
+        # Cite the signals the message is about when it names them; otherwise every open issue justifies contacting the employee.
+        text = msg.lower()
+        named = [d for d in devices if d.lower() in text]
+        backing = [s for s, did, words in found if (not named or did in named) and any(w in text for w in words)]
+        if backing:
+            return PolicyDecision(True, rule, [f"{len(backing)} issue signal(s) back what the message says"], backing)
+        signals = [s for s, _, _ in found]
         return PolicyDecision(True, rule, [f"{len(signals)} active issue signal(s) on the employee's devices"], signals)

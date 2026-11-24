@@ -55,3 +55,22 @@ def test_notify_without_named_people_targets_affected_owners(make_session):
 def test_open_ended_action_question_proposes_actions(make_session):
     r = make_session("acme-001").ask("what actions should I take?")
     assert r.status == "awaiting_approval" and r.approval_request["proposals"]
+
+
+def test_single_attribute_question_answers_directly_first(make_session):
+    r = make_session("acme-001").ask("how much RAM does MT7PJB7N5LRE have?")
+    assert r.answer.startswith("MT7PJB7N5LRE has 16 GB of RAM") and r.grounding_status == "passed"
+
+
+def test_drift_question_leads_with_the_answer_and_the_drift(make_session):
+    r = make_session("acme-001").ask("has compliance gotten worse this month?")
+    assert r.answer.startswith("Yes, compliance got worse") and r.grounding_status == "passed"
+    details = r.answer.split("Details:", 1)[1]
+    assert details.index("Fleet compliance drift") < details.index("Chronic non-compliance")
+
+
+def test_notification_sticks_to_the_requested_issue(make_session):
+    r = make_session("acme-001").ask("tell the owner of 8NM23J95R5I6 to free up disk space")
+    (prop,) = r.approval_request["proposals"]
+    assert "disk space" in prop["args"]["message"] and "screen_lock" not in prop["args"]["message"]
+    assert [ev["claim"].split(" ")[1] for ev in prop["evidence"]] == ["free"]  # only the storage signal backs it

@@ -1,6 +1,6 @@
 # Fleet Copilot evaluation report (rule reasoner)
 
-Generated 2026-11-24 07:27 UTC. **50/50 cases passed (100.0%).**
+Generated 2026-11-24 08:08 UTC. **50/50 cases passed (100.0%).**
 
 ## By category
 
@@ -19,7 +19,7 @@ Generated 2026-11-24 07:27 UTC. **50/50 cases passed (100.0%).**
 | Insight device recall | 1.0 |
 | Answers passing grounding verification | 42/42 |
 | Answers replaced by evidence-only fallback | 0 |
-| Citation validity (cited IDs that exist in the ledger) | 1.0 (249 citations) |
+| Citation validity (cited IDs that exist in the ledger) | 1.0 (247 citations) |
 | Numeric support rate (% / GB figures found in evidence) | 1.0 |
 | Refusal recall (expected refusals that were refused) | 1.0 |
 | False refusals | 0 |
@@ -28,7 +28,7 @@ Generated 2026-11-24 07:27 UTC. **50/50 cases passed (100.0%).**
 | **Cross-tenant references in answers** | **0** |
 | **Fabricated device IDs in answers** | **0** |
 | Audit hash chain | intact (1074 records) |
-| Mean / p95 latency per case | 0.032s / 0.063s |
+| Mean / p95 latency per case | 0.029s / 0.051s |
 | Mean tool calls per case | 1.42 |
 | Determinism (identical answers across 2 runs) | 50/50 |
 

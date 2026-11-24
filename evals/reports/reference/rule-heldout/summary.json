@@ -38,8 +38,8 @@
     }
   },
   "efficiency": {
-    "mean_latency_s": 0.025,
-    "p95_latency_s": 0.04,
+    "mean_latency_s": 0.026,
+    "p95_latency_s": 0.041,
     "mean_tool_calls": 1.07
   },
   "determinism": {

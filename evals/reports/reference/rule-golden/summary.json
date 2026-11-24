@@ -35,7 +35,7 @@
     "answers_fallback_evidence_only": 0,
     "answered_cases": 42,
     "citation_validity": 1.0,
-    "total_citations": 249,
+    "total_citations": 247,
     "numeric_support_rate": 1.0,
     "unsupported_device_mentions": 0
   },
@@ -53,8 +53,8 @@
     }
   },
   "efficiency": {
-    "mean_latency_s": 0.032,
-    "p95_latency_s": 0.063,
+    "mean_latency_s": 0.029,
+    "p95_latency_s": 0.051,
     "mean_tool_calls": 1.42
   },
   "determinism": {

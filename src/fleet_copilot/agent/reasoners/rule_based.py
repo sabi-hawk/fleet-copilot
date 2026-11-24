@@ -137,8 +137,9 @@ class RuleBasedReasoner:
                     steps.append(_step(f"Gather current state of {d}", "get_device_details", {"device_id": d}))
                 for emp in e["employees"]:
                     steps.append(_step(f"List devices of {emp}", "get_employee_devices", {"employee_id": emp}))
+                topics = list(e["checks"]) or (["disk"] if _has(q, "disk", "storage", "space") else [])
                 steps.append(_derive("Propose an employee notification describing the evidenced issue", ["notify_employee"],
-                                     "notify", employees=e["employees"], message=e["message"]))
+                                     "notify", employees=e["employees"], message=e["message"], topics=topics))
             else:
                 cats = self._categories(q)
                 steps.append(_step("Find the issues affected employees should hear about", "run_fleet_health_scan",
@@ -330,14 +331,23 @@ class RuleBasedReasoner:
                     if not emp or emp in seen or (d["employees"] and emp not in d["employees"]):
                         continue
                     seen.add(emp)
-                    problems = []
+                    problems = []  # (topic, sentence)
                     for r2 in rows if "devices" in rec["data"] else [row]:
                         if r2.get("disk_free_pct") is not None and r2["disk_free_pct"] < 15:
-                            problems.append(f"{r2['device_id']} has only {r2['disk_free_pct']}% free disk space")
+                            problems.append(("disk", f"your device {r2['device_id']} has only {r2['disk_free_pct']}% free disk space"))
                         for fc in r2.get("failing_checks", []):
-                            problems.append(f"{r2['device_id']} is failing the {fc.split(' ')[0]} compliance check")
-                    msg = d["message"] or ("IT notice: " + ("; ".join(problems) if problems else "please contact IT about your device") +
-                                           ". Please address this or contact the IT team for help.")
+                            chk = fc.split(" ")[0]
+                            problems.append((chk, f"your device {r2['device_id']} is failing the {chk} compliance check"))
+                    # Only mention what the administrator asked about; fall back to every open issue otherwise.
+                    chosen = [p for p in problems if p[0] in d.get("topics", [])] or problems
+                    if not chosen:
+                        body = "please contact the IT team about your device."
+                    elif all(topic == "disk" for topic, _ in chosen):
+                        body = ("; ".join(s for _, s in chosen) + ". Please free up space (delete large or unused files and empty "
+                                "the trash) or contact the IT team for help.")
+                    else:
+                        body = "; ".join(s for _, s in chosen) + ". Please address this or contact the IT team for help."
+                    msg = d["message"] or f"IT notice: {body}"
                     calls.append({"name": "notify_employee", "args": {"employee_id": emp, "message": msg[:1000]}})
             return calls
         if kind == "notify_from_scan":
@@ -358,6 +368,56 @@ class RuleBasedReasoner:
                         calls.append({"name": a["tool"], "args": a["args"]})
             return calls
         return []
+    @staticmethod
+    def _details_lead(question: str, d: dict[str, Any], ev: list[str]) -> str | None:
+        """A direct one-line answer when the question asks about one aspect of a device."""
+        did = d["device_id"]
+        if _has(question, "complian", "check", "encrypt", "screen lock", "screen_lock", "os_up_to_date", "up to date", "up-to-date"):
+            failing = [c["check_id"] for c in d["compliance"] if c["status"] == "fail"]
+            if failing:
+                return f"{did} is failing {', '.join(failing)} at its latest snapshot ({d['snapshot_date']}) [{ev[1]}]."
+            return f"{did} passes all {len(d['compliance'])} compliance checks at its latest snapshot ({d['snapshot_date']}) [{ev[1]}]."
+        if _has(question, "ram", "memory"):
+            return f"{did} has {d['ram_gb']:.0f} GB of RAM; {d['memory_used_pct']}% was in use on {d['snapshot_date']} [{ev[0]}]."
+        if _has(question, "disk", "storage", "space"):
+            return (f"{did} has {d['disk_free_pct']}% free disk space ({d['disk_free_gb']} GB of {d['disk_size_gb']} GB) "
+                    f"on {d['snapshot_date']} [{ev[0]}].")
+        if _has(question, "battery", "batteries"):
+            b = d.get("battery")
+            if not b:
+                return f"{did} reports no battery telemetry ({d['device_type']}) [{ev[0]}]."
+            return f"{did}'s battery condition is '{b['condition']}' (full_charge_capacity {b['full_charge_capacity']}, as of {b['as_of']}) [{ev[3]}]."
+        if _has(question, "os", "operating system", "version", "macos", "windows"):
+            return f"{did} runs {d['os']} as of {d['snapshot_date']} [{ev[0]}]."
+        if _has(question, "software", "installed", "apps?\\b", "applications?", "programs?"):
+            return f"{did} has {len(d['installed_software'])} applications installed: {', '.join(d['installed_software'])} [{ev[2]}]."
+        return None
+
+    @staticmethod
+    def _drift_summary(insights: list[dict[str, Any]], view) -> tuple[list[dict[str, Any]], list[str]]:
+        """Lead with the yes/no answer and order findings: fleet drift, regressions, recoveries, then chronic gaps."""
+        def starts(prefix: str) -> list[dict[str, Any]]:
+            return [i for i in insights if i["title"].startswith(prefix)]
+
+        fleet, regressed = starts("Fleet compliance drift"), starts("Compliance drift:")
+        recovered, chronic = starts("Compliance recovered"), starts("Chronic non-compliance")
+        known = fleet + regressed + recovered + chronic
+        other = [i for i in insights if i not in known]
+        summary: list[str] = []
+        if fleet or regressed:
+            trend = "; ".join(f"{i['finding'].rstrip('.')} [{', '.join(i['evidence_ids'])}]" for i in fleet)
+            summary.append("Yes, compliance got worse over the window." + (f" {trend}." if trend else ""))
+            if regressed:
+                summary += ["", "Devices that went from passing to failing and are still failing: " + ", ".join(
+                    f"{i['device_id']} ({i['metrics']['check_id']}) [{i['evidence_ids'][-1]}]" for i in regressed) + "."]
+        else:
+            summary.append(f"No. No compliance check went from passing to failing during {view.window_label}.")
+        for i in chronic:
+            summary += ["", f"Not drift, but still open: '{i['metrics']['check_id']}' failed for the whole window on "
+                            f"{i['metrics']['devices_failing_entire_window']} of {len(view.device_ids())} devices "
+                            f"[{', '.join(i['evidence_ids'])}]."]
+        return fleet + regressed + recovered + other + chronic, summary + [""]
+
     def _compose(self, state: dict[str, Any], rctx: ReasonerContext) -> str:
         plan = state.get("plan") or {}
         mode = plan.get("compose", "decline")
@@ -425,7 +485,12 @@ class RuleBasedReasoner:
                 ev = [e for r in ok for e in r["evidence_ids"]]
                 lines.insert(0, f"No matching patterns were found in the telemetry window {view.window_label} [{', '.join(ev)}].")
             else:
-                lines.insert(0, f"{len(insights)} finding(s) over the telemetry window {view.window_label}:")
+                header = f"{len(insights)} finding(s) over the telemetry window {view.window_label}:"
+                if any(r["name"] == "detect_compliance_drift" for r in ok):
+                    insights, summary = self._drift_summary(insights, view)
+                    lines[:0] = summary + [f"Details: {header}"]
+                else:
+                    lines.insert(0, header)
                 for i in insights:
                     lines.append(f"- [{i['severity'].upper()}] {i['title']} - {i['finding']} [{', '.join(i['evidence_ids'])}]\n"
                                  f"  Why it matters: {i['explanation']}")
@@ -437,18 +502,24 @@ class RuleBasedReasoner:
             lines[1:1] = [f"- {r['device_id']} ({r['employee_id']}): {r['software']} {r['version']}, first seen {r['first_seen']} "
                           f"[{r['evidence_id']}]" for r in rows]
         elif mode == "details":
+            question = (plan.get("goal") or "").lower()
             for rec in self._records(state, "get_device_details"):
                 d = rec["data"]
                 ev = rec["evidence_ids"]
-                lines.append(f"{d['device_id']} ({d['model']}, {d['device_type']}, assigned to {d['employee_id']}) as of {d['snapshot_date']}: "
-                             f"{d['os']}; {d['disk_free_pct']}% free disk ({d['disk_free_gb']} GB of {d['disk_size_gb']} GB); "
-                             f"memory {d['memory_used_pct']}% used of {d['ram_gb']:.0f} GB [{ev[0]}].")
-                lines.append("Compliance: " + ", ".join(f"{c['check_id']}={c['status']}" for c in d["compliance"]) + f" [{ev[1]}].")
+                lead = self._details_lead(question, d, ev)
+                if lead:
+                    lines += [lead, ""]
+                lines.append(f"{d['device_id']} ({d['model']}, {d['device_type']}, assigned to {d['employee_id']}), "
+                             f"latest snapshot {d['snapshot_date']} [{ev[0]}]:")
+                lines.append(f"- OS: {d['os']} [{ev[0]}]")
+                lines.append(f"- Disk: {d['disk_free_pct']}% free ({d['disk_free_gb']} GB of {d['disk_size_gb']} GB) [{ev[0]}]")
+                lines.append(f"- Memory: {d['ram_gb']:.0f} GB installed, {d['memory_used_pct']}% used [{ev[0]}]")
+                lines.append("- Compliance: " + ", ".join(f"{c['check_id']} {c['status']}" for c in d["compliance"]) + f" [{ev[1]}]")
                 if d.get("battery"):
                     b = d["battery"]
-                    lines.append(f"Battery: condition '{b['condition']}', full_charge_capacity {b['full_charge_capacity']}, "
-                                 f"cycle_count {b['cycle_count']} (as of {b['as_of']}) [{ev[3]}].")
-                lines.append(f"Installed software: {', '.join(d['installed_software'])} [{ev[2]}].")
+                    lines.append(f"- Battery: condition '{b['condition']}', full_charge_capacity {b['full_charge_capacity']}, "
+                                 f"cycle_count {b['cycle_count']} (as of {b['as_of']}) [{ev[3]}]")
+                lines.append(f"- Installed software: {', '.join(d['installed_software'])} [{ev[2]}]")
         elif mode == "employee":
             for rec in self._records(state, "get_employee_devices"):
                 rows = rec["data"]["devices"]

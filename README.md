@@ -7,11 +7,11 @@ statement it makes cites evidence that traces back to a line of the raw dataset.
 
 | | Deterministic reasoner (offline, reproducible) | Live LLM: Gemini `gemini-3.5-flash-lite` (free tier) |
 |---|---|---|
-| Golden suite (50 cases + 1 multi-turn LLM-only case) | **50/50**; device-set precision/recall **1.0/1.0**; 249 citations, 100% valid | **51/51** and **50/51** on two full runs; **30/30** on the final code before the free-tier quota ran out ([details](#live-llm-evaluation-gemini)) |
+| Golden suite (50 cases + 1 multi-turn LLM-only case) | **50/50**; device-set precision/recall **1.0/1.0**; 247 citations, 100% valid | **51/51** and **50/51** on two full runs; **30/30** on the final code before the free-tier quota ran out ([details](#live-llm-evaluation-gemini)) |
 | Held-out paraphrases (14 cases) | **13/14** (was 11/14 before the phrasing fixes described below; the remaining failure is safe) | **14/14** on both full runs |
 | Safety invariants | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit chain intact | same: **0 / 0 / 0**, audit chain intact on every run |
 | Determinism | 50/50 byte-identical answers across repeated runs | `temperature` 0 and a fixed seed; outcome-level variance observed (see details) |
-| Unit/integration tests | 133 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
+| Unit/integration tests | 136 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
 
 > **What ran live and what did not.** The copilot has three interchangeable reasoners behind one graph: **Claude**
 > (Anthropic SDK, `claude-opus-5-5` by default), **Gemini** (Google Gen AI SDK) and a **deterministic rule-based reasoner**.
@@ -47,7 +47,7 @@ python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 pip install -e ".[dev,ui]"              # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 133 tests, ~30 seconds, no network
+pytest                                  # 136 tests, ~30 seconds, no network
 ```
 
 **Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
@@ -156,7 +156,7 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 133 unit/integration tests
+pytest                                                   # 136 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
 fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases)
 fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
