@@ -12,6 +12,8 @@ _EMPLOYEE_RE = re.compile(r"\bemp-[a-z]+-\d+\b", re.IGNORECASE)
 _SPEC_RE = re.compile(r"\b(\d+(?:\.\d+)?)\s*(gb|tb)\b", re.IGNORECASE)
 _QUOTE_RE = re.compile(r"[\"“']([^\"”']{8,})[\"”']")
 _OS_RE_1 = re.compile(r"(?:older than|below|before|prior to|earlier than|lower than|under|<)\s*(macos|mac os|windows)\s*(\d+(?:\.\d+)?)", re.I)
+# "flag <devices>" on its own means a replacement flag: it is the only flagging tool.
+_FLAG_REQUEST = re.compile(r"\bflag\s+(?:every|all|each|any|the|these|those|this|devices?|laptops?|desktops?|macs?|[a-z0-9]{12}\b)")
 _OS_RE_2 = re.compile(r"(macos|mac os|windows)\s*(?:version\s*)?(?:older than|below|before|prior to|earlier than|lower than|under|<)\s*(\d+(?:\.\d+)?)", re.I)
 CHECK_SYNONYMS = {
     "disk_encryption": ("disk_encryption", "disk encryption", "encryption", "filevault", "bitlocker"),
@@ -99,7 +101,7 @@ class RuleBasedReasoner:
                                    {"check_id": chk, "status": "fail", **({"severity": e["severity"]} if e["severity"] else {})}))
                 steps.append(_derive("Propose a remediation ticket per failing device", ["open_remediation_ticket"],
                                      "tickets_from_compliance", check=chk))
-        elif wants_action and _has(q, "replace", "replacement"):
+        elif wants_action and (_has(q, "replace", "replacement") or _FLAG_REQUEST.search(q)):
             intent, compose = "action", "actions"
             steps.append(_step("Check battery end-of-life evidence", "detect_battery_health"))
             steps.append(_step("Check sustained memory-pressure evidence", "detect_memory_pressure"))

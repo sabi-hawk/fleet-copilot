@@ -47,6 +47,20 @@ def test_approval_approve_executes_after_decision(make_session):
     assert "executed as TKT-0001" in r.answer
 
 
+def test_plain_flag_request_is_a_replacement_proposal(make_session):
+    s = make_session("acme-001")
+    r = s.ask("flag every device whose battery is approaching end of life")
+    assert r.status == "awaiting_approval"
+    flagged = {p["args"]["device_id"] for p in r.approval_request["proposals"]}
+    assert flagged == {"7VP16KHV88LM", "8NM23J95R5I6", "M4XVHUV1MEPZ"}
+    assert all(p["tool"] == "flag_device_for_replacement" for p in r.approval_request["proposals"])
+
+
+def test_flag_as_a_noun_stays_a_question(make_session):
+    r = make_session("acme-001").ask("Which batteries have a health flag other than Normal?")
+    assert r.status == "answered" and not r.proposals
+
+
 def test_reject_and_missing_or_non_human_approver_execute_nothing(make_session):
     for decisions, approver in (({"P1-1": "reject"}, "alice"), ({"P1-1": "approve"}, None), ({"P1-1": "approve"}, "assistant")):
         s = make_session("acme-001")
