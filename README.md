@@ -80,15 +80,16 @@ fleet-copilot ui          # opens http://localhost:8501
 
 | Area | What it does |
 |---|---|
-| Sidebar | Pick the organization (the session is bound to it), the reasoner (Offline, plus Gemini or Claude when a key is set) and the approver identity |
-| 💬 Copilot | Chat with one-click example questions: the brief's questions, insights, actions and guardrail probes. Each answer shows a one-line trace (guard → plan → tools → grounding → time). Expandable panels show its cited evidence, where any item opens the **raw dataset record** it came from, and the plan and tool calls. Action proposals appear as approval cards with Approve/Reject per proposal; nothing runs until you submit. |
-| 🔎 Data explorer | The organization's devices straight from the dataset (latest snapshot): a sortable table, per-device 30-day charts for disk, memory and battery, compliance and software history, and the raw JSON record for any date |
-| ✅ Verify answers | Runs the organization's golden cases through the copilot and shows the independently prepared expected answer next to what the copilot said, pass or fail |
-| 📊 Fleet insights | Every detector's findings for the organization, ranked by severity, each with evidence (including raw records) and an explanation |
-| 📦 Action outbox | Tickets, orders, replacement flags and notifications that were approved and executed |
-| 🧾 Audit log | The organization's audit events, filterable by type, plus a button to verify the hash chain |
+| Sidebar | Pick the organization (the session is bound to it), the AI engine (Offline, plus Gemini or Claude when a key is set) and the approver identity |
+| Header | Organization, engine and isolation badges, the telemetry window, and counts of devices, employees, critical/high insights, proposals awaiting approval and executed actions |
+| Copilot | Chat with one-click example questions: the brief's questions, insights, actions and guardrail probes. Each answer shows a grounding badge and a one-line trace (input check, plan, tools, time). Expandable panels show its cited evidence, where any item opens the **raw dataset record** it came from, and the plan and tool calls. Action proposals appear as approval cards with Approve/Reject per proposal; nothing runs until you submit. |
+| Data explorer | The organization's devices straight from the dataset (latest snapshot): a filterable table, per-device 30-day charts for disk, memory and battery, compliance and software history, and the raw JSON record for any date |
+| Verify answers | Runs the organization's golden cases through the copilot and shows the independently prepared expected answer next to what the copilot said, pass or fail |
+| Fleet insights | Every detector's findings for the organization, filterable by severity, each with evidence (including raw records) and an explanation |
+| Action outbox | Tickets, orders, replacement flags and notifications that were approved and executed |
+| Audit log | The organization's audit events, filterable by type, plus a button to verify the hash chain |
 
-The UI keeps its own outbox and audit log under `var/ui/`; **Reset demo data** clears them.
+The UI keeps its own outbox and audit log under `var/ui/`; **Reset demo data** clears them. The theme (light and dark, following the system setting) is in `.streamlit/config.toml`.
 
 ### Checking answers yourself
 
