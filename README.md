@@ -42,7 +42,7 @@ Requirements: Python **3.11+** (developed and verified on Python 3.13, Windows 1
 the dataset ships in `data/`.
 
 ```bash
-git clone <this-repo> fleet-copilot && cd fleet-copilot
+git clone https://github.com/sabi-hawk/fleet-copilot.git && cd fleet-copilot
 python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
