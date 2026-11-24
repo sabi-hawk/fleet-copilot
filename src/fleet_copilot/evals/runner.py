@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 import statistics
 import threading
 import time
@@ -323,6 +324,7 @@ def run_suite(reasoner: str = "rule", suite_dir: str | Path | None = None, out_d
         audit_path.unlink()
     for rep in range(repeats):
         run_dir = out / f"run{rep + 1}"
+        shutil.rmtree(run_dir, ignore_errors=True)  # a re-run into the same folder must not inherit executed actions
         s = replace(settings, home=run_dir)
         audit = AuditLog(audit_path)
         quota_hit = threading.Event()

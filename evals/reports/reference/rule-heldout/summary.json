@@ -1,26 +1,26 @@
 {
   "cases": 14,
-  "passed": 11,
-  "pass_rate": 0.7857,
+  "passed": 13,
+  "pass_rate": 0.9286,
   "by_category": {
     "paraphrase": {
-      "passed": 11,
+      "passed": 13,
       "total": 14,
-      "pass_rate": 0.7857
+      "pass_rate": 0.9286
     }
   },
   "grounded_qa": {
     "device_set_precision": 1.0,
-    "device_set_recall": 0.5,
-    "device_set_f1": 0.6667,
-    "insight_device_recall": 0.375
+    "device_set_recall": 1.0,
+    "device_set_f1": 1.0,
+    "insight_device_recall": 1.0
   },
   "grounding": {
     "answers_verified_first_pass_or_revised": 12,
     "answers_fallback_evidence_only": 0,
     "answered_cases": 12,
     "citation_validity": 1.0,
-    "total_citations": 43,
+    "total_citations": 65,
     "numeric_support_rate": 1.0,
     "unsupported_device_mentions": 0
   },
@@ -33,14 +33,14 @@
     "action_outcome_accuracy": 0.75,
     "audit_chain": {
       "intact": true,
-      "records": 256,
-      "message": "audit chain intact (256 records)"
+      "records": 264,
+      "message": "audit chain intact (264 records)"
     }
   },
   "efficiency": {
     "mean_latency_s": 0.025,
-    "p95_latency_s": 0.041,
-    "mean_tool_calls": 0.93
+    "p95_latency_s": 0.04,
+    "mean_tool_calls": 1.07
   },
   "determinism": {
     "repeats": 2,

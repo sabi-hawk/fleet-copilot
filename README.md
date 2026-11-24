@@ -8,10 +8,10 @@ statement it makes cites evidence that traces back to a line of the raw dataset.
 | | Deterministic reasoner (offline, reproducible) | Live LLM: Gemini `gemini-3.5-flash-lite` (free tier) |
 |---|---|---|
 | Golden suite (50 cases + 1 multi-turn LLM-only case) | **50/50**; device-set precision/recall **1.0/1.0**; 249 citations, 100% valid | **51/51** and **50/51** on two full runs; **30/30** on the final code before the free-tier quota ran out ([details](#live-llm-evaluation-gemini)) |
-| Held-out paraphrases (14 cases, never tuned against) | **11/14**; all 3 failures are safe declines | **14/14** on both full runs |
+| Held-out paraphrases (14 cases) | **13/14** (was 11/14 before the phrasing fixes described below; the remaining failure is safe) | **14/14** on both full runs |
 | Safety invariants | **0** executions without human approval, **0** cross-tenant references, **0** fabricated IDs, audit chain intact | same: **0 / 0 / 0**, audit chain intact on every run |
 | Determinism | 50/50 byte-identical answers across repeated runs | `temperature` 0 and a fixed seed; outcome-level variance observed (see details) |
-| Unit/integration tests | 122 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
+| Unit/integration tests | 133 passing (no network), including fault-injection tests that prove the evaluator catches a broken agent | |
 
 > **What ran live and what did not.** The copilot has three interchangeable reasoners behind one graph: **Claude**
 > (Anthropic SDK, `claude-opus-5-5` by default), **Gemini** (Google Gen AI SDK) and a **deterministic rule-based reasoner**.
@@ -47,7 +47,7 @@ python -m venv .venv
 # Windows:      .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 pip install -e ".[dev,ui]"              # or, for exact versions: pip install -r requirements-lock.txt && pip install -e . --no-deps
-pytest                                  # 122 tests, ~30 seconds, no network
+pytest                                  # 133 tests, ~30 seconds, no network
 ```
 
 **Optional: enable an LLM reasoner.** Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (Claude) and/or
@@ -156,9 +156,9 @@ print(r.answer)
 ## 3. Running evaluations
 
 ```bash
-pytest                                                   # 122 unit/integration tests
+pytest                                                   # 133 unit/integration tests
 fleet-copilot eval --reasoner rule                       # golden suite (50 cases), run twice for a determinism check
-fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases; 11/14 is below the default gate)
+fleet-copilot eval --reasoner rule --suite evals/heldout --min-pass 0   # held-out paraphrases (14 cases)
 fleet-copilot eval --reasoner gemini --workers 4 --min-pass 0   # same golden suite, live Gemini (needs GEMINI_API_KEY)
 fleet-copilot eval --reasoner claude                     # same golden suite against Claude (needs ANTHROPIC_API_KEY)
 fleet-copilot eval --only qa- --only gr-                 # filter by case-ID prefix
@@ -194,7 +194,7 @@ below 90%, so it can gate CI. Reference reports are committed in [`evals/reports
   - audit-chain integrity;
   - latency and tool calls per case;
   - determinism across repeats.
-- **Held-out paraphrases** (`evals/heldout/`) were written after the golden suite and deliberately not tuned against. Their score (11/14) is the honest measure of the deterministic parser's brittleness. All three failures fail safe: two decline ("I couldn't map this request ... so I won't guess"), and one answers with grounded device details but proposes no action.
+- **Held-out paraphrases** (`evals/heldout/`) were written after the golden suite to measure the deterministic parser's brittleness. It first scored **11/14**, and all three failures failed safe: two declined ("I couldn't map this request ... so I won't guess"), and one answered with grounded device details but proposed no action. A later pass probed the offline planner with about 60 natural phrasings across every requirement and fixed the misroutes it found (negated OS versions such as "haven't been upgraded to macOS 15", "disk encryption" being read as a disk-space question, drift wordings such as "stopped being compliant", notifications without named employees, questions about one named device). Two of those fixes overlap held-out phrasings, so the current **13/14** is no longer an untouched held-out score; the regression tests for the probed phrasings are in `tests/test_rule_routing.py`. The remaining failure ("send ... a heads-up") is safe: no action is proposed.
 - **Evaluating the evaluator** (`tests/test_eval_harness.py`): sabotaged agents must fail the suite. Covered cases:
   - an answer padded with an unrelated device;
   - a hallucinated citation plus an invented device;
@@ -208,7 +208,7 @@ below 90%, so it can gate CI. Reference reports are committed in [`evals/reports
 | golden / insights | 12 | 12 | battery EOL, RAM, storage, drift, software, fleet scan |
 | golden / actions | 11 | 11 | allowed + blocked proposals, approve/reject, bulk actions (one multi-turn case runs only with Claude) |
 | golden / guardrails | 11 | 11 | cross-tenant (name, device ID, employee ID, hostname, "all companies"), injection, pre-approval claims, invalid approvers |
-| held-out paraphrases | 14 | 11 | rule-based baseline brittleness; safe failures |
+| held-out paraphrases | 14 | 13 | rule-based baseline brittleness; the failure is safe (11/14 before the phrasing fixes) |
 
 ### Live LLM evaluation (Gemini)
 
@@ -232,7 +232,7 @@ parallel workers. Free-tier constraints shaped the setup:
   - 0 evidence-only fallbacks;
   - numeric support 0.87 (a soft metric: some restated figures, such as derived percentages, did not match evidence within tolerance);
   - refusal recall 1.0, 0 false refusals, action-outcome accuracy 1.0.
-- **What the LLM adds over the baseline.** It answered all three held-out paraphrases the rule-based parser declines ("haven't been upgraded to macOS 15", "stopped locking their screens", "send … a heads-up"). It also resolved the multi-turn follow-up ("notify the employees who use *those* devices").
+- **What the LLM adds over the baseline.** It answered all three held-out paraphrases the rule-based parser originally missed ("haven't been upgraded to macOS 15", "stopped locking their screens", "send … a heads-up"). It also resolved the multi-turn follow-up ("notify the employees who use *those* devices").
 - **Latency.** 25–40 s per case on average, almost entirely free-tier API queueing; the graph's own nodes take about 0.1 s.
 - **Reproduce:** `fleet-copilot eval --reasoner gemini --workers 3 --min-pass 0`, with `GEMINI_API_KEY` set and optionally `FLEET_COPILOT_GEMINI_MODEL=gemini-3.5-flash-lite`. To complete a quota-truncated run after the daily reset, use `--only <case-id-prefix>`.
 
@@ -397,7 +397,7 @@ the brief's exact signatures and only ever create proposals.
 | **LangGraph with a hand-written graph**, not a prebuilt ReAct agent | Planning, reflection, the policy gate, the approval interrupt and verification are explicit, testable nodes. The brief asks for "planning, tool calling, explicit agent loop". | More code than `create_react_agent`. |
 | **Official `anthropic` SDK inside nodes**, not `langchain-anthropic` | Direct control of current API behavior: adaptive thinking, `output_config.effort`, no sampling parameters, refusal fallback, thinking blocks replayed unchanged. | We own message conversion (`block_to_param`), which is small and tested. |
 | **Analytics as deterministic tools; the LLM orchestrates and explains** | Statistics must be correct and reproducible; LLMs are unreliable at arithmetic over 750 records. | Coverage is limited to the patterns implemented as detectors. The LLM can still combine read tools for novel questions. |
-| **Three reasoners behind one interface** (Claude, Gemini, rule-based) | Reproducible evals and keyless operation (a requirement for "reasonably deterministic execution" and a runnable suite), a baseline to compare LLMs against, and no lock-in to one model provider. Adding Gemini took one ~200-line class; the graph, tools, guardrails and evals were untouched. | The rule-based parser is brittle to phrasing (held-out 11/14), but it fails safe by declining. Each LLM provider needs its own message/tool plumbing. |
+| **Three reasoners behind one interface** (Claude, Gemini, rule-based) | Reproducible evals and keyless operation (a requirement for "reasonably deterministic execution" and a runnable suite), a baseline to compare LLMs against, and no lock-in to one model provider. Adding Gemini took one ~200-line class; the graph, tools, guardrails and evals were untouched. | The rule-based parser is brittle to phrasing (held-out 11/14 at first, 13/14 after the phrasing fixes), but it fails safe by declining. Each LLM provider needs its own message/tool plumbing. |
 | **Determinism strategy** | Current Claude models reject `temperature`, so determinism comes from the architecture: deterministic tools, stable evidence IDs, verifier, templated action status. Rule mode is byte-identical across runs. | Claude answers vary in wording; the evals check outcomes, not exact text. |
 | **Policy engine recomputes evidence** | A model's justification is not evidence. Recomputing makes "refuse actions without sufficient evidence" enforceable and auditable. | The rules are explicit and conservative; edge cases need policy changes, not prompting. |
 | **Proposal and execution split**, with re-check at execution | Allows human review with full evidence, and protects against stale approvals (tested with two concurrent sessions). | One extra round-trip per action. |

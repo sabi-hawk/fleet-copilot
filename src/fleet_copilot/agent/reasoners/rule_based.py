@@ -18,8 +18,13 @@ _OS_RE_2 = re.compile(r"(macos|mac os|windows)\s*(?:version\s*)?(?:older than|be
 CHECK_SYNONYMS = {
     "disk_encryption": ("disk_encryption", "disk encryption", "encryption", "filevault", "bitlocker"),
     "screen_lock": ("screen_lock", "screen lock", "screenlock", "lock screen", "auto-lock"),
-    "os_up_to_date": ("os_up_to_date", "os up to date", "up-to-date", "up to date", "os updates", "outdated os", "patch"),
+    "os_up_to_date": ("os_up_to_date", "os up to date", "up-to-date", "up to date", "os updates", "outdated", "out of date", "out-of-date", "patch"),
 }
+# "not on macOS 15", "haven't been upgraded to macOS 15 yet", "aren't running Windows 11"
+_OS_RE_NOT = re.compile(r"(?:\bnot (?:yet )?(?:on|running|upgraded to|updated to)|n't (?:yet )?(?:been )?(?:upgraded|updated|moved)(?: yet)? to|n't (?:on|running))"
+                        r"\s+(macos|mac os|windows)\s*(\d+(?:\.\d+)?)", re.I)
+# "devices running macOS 14": a whole major version
+_OS_RE_EXACT = re.compile(r"\b(?:on|run|runs|running|with|using)\s+(macos|mac os|windows)\s*(\d+)(?![\d.])", re.I)
 
 
 def _has(text: str, *words: str) -> bool:
@@ -54,10 +59,15 @@ class RuleBasedReasoner:
         if sev is None and re.search(r"\bcritical\b.*\b(check|compliance)", q):
             sev = "high"
         dtype = "laptop" if _has(q, "laptop", "notebook", "macbook") else ("desktop" if _has(q, "desktop", "mac mini") else None)
-        os_m = _OS_RE_1.search(question) or _OS_RE_2.search(question)
+        os_m = _OS_RE_1.search(question) or _OS_RE_2.search(question) or _OS_RE_NOT.search(question)
         os_bound = None
         if os_m:
             os_bound = {"os_name": "macOS" if "mac" in os_m.group(1).lower() else "Windows", "below": os_m.group(2)}
+        elif exact := _OS_RE_EXACT.search(question):
+            major = int(exact.group(2))
+            os_bound = {"os_name": "macOS" if "mac" in exact.group(1).lower() else "Windows",
+                        "at_least": str(major), "below": str(major + 1)}
+        os_family = "macOS" if _has(q, "macos", "mac os", "macs?\\b") else ("Windows" if _has(q, "windows") else None)
         spec = _SPEC_RE.search(question)
         quote = _QUOTE_RE.search(question)
         component = ("memory" if _has(q, "ram", "memory") else "storage" if _has(q, "storage", "disk", "ssd", "drive")
@@ -67,12 +77,12 @@ class RuleBasedReasoner:
         for known in ("utorrent", "teamviewer", "cleanmymac", "chrome", "slack", "zoom", "1password", "visual studio code"):
             if known in q:
                 sw_name = known
-        if sw_name is None and sw and sw.group(1).strip().lower() not in ("changes", "installed", "drift", "new"):
+        if sw_name is None and sw and sw.group(1).strip().lower() not in ("changes", "installed", "drift", "new", "is", "are", "was", "were"):
             sw_name = sw.group(1).strip()
         return {
             "devices": list(dict.fromkeys(_DEVICE_RE.findall(question))),
             "employees": list(dict.fromkeys(e.lower() for e in _EMPLOYEE_RE.findall(question))),
-            "checks": checks, "severity": sev, "device_type": dtype, "os_bound": os_bound,
+            "checks": checks, "severity": sev, "device_type": dtype, "os_bound": os_bound, "os_family": os_family,
             "spec": f"{spec.group(1)} {spec.group(2).upper()}" if spec else None,
             "message": quote.group(1).strip() if quote else None, "component": component, "software": sw_name,
             "count": _has(q, "how many", "number of", "count"),
@@ -86,7 +96,8 @@ class RuleBasedReasoner:
         intent, compose, assumptions = "question", "devices", []
         th = rctx.settings.thresholds
         wants_action = _has(q, "open", "create", "raise", "file", "flag", "order", "upgrade", "notify", "message", "tell ", "email",
-                            "propose", "remediat", "replace", "fix", "take action", "what should")
+                            "propose", "remediat", "replace", "fix", "take action", "what should", "should i", "should we",
+                            "recommend", "what actions", "which actions")
         devs = e["devices"]
         if wants_action and _has(q, "ticket", "remediation", "remediate") and not _has(q, "replace", "upgrade", "notify"):
             intent, compose = "action", "actions"
@@ -121,23 +132,36 @@ class RuleBasedReasoner:
                 assumptions.append("No spec given: using the next capacity tier recommended by the detector.")
         elif wants_action and _has(q, "notify", "message", "tell ", "email", "inform", "remind"):
             intent, compose = "action", "actions"
-            for d in devs:
-                steps.append(_step(f"Gather current state of {d}", "get_device_details", {"device_id": d}))
-            for emp in e["employees"]:
-                steps.append(_step(f"List devices of {emp}", "get_employee_devices", {"employee_id": emp}))
-            steps.append(_derive("Propose an employee notification describing the evidenced issue", ["notify_employee"],
-                                 "notify", employees=e["employees"], message=e["message"]))
-        elif wants_action and _has(q, "propose", "remediat", "take action", "what should", "fix", "next step"):
+            if devs or e["employees"]:
+                for d in devs:
+                    steps.append(_step(f"Gather current state of {d}", "get_device_details", {"device_id": d}))
+                for emp in e["employees"]:
+                    steps.append(_step(f"List devices of {emp}", "get_employee_devices", {"employee_id": emp}))
+                steps.append(_derive("Propose an employee notification describing the evidenced issue", ["notify_employee"],
+                                     "notify", employees=e["employees"], message=e["message"]))
+            else:
+                cats = self._categories(q)
+                steps.append(_step("Find the issues affected employees should hear about", "run_fleet_health_scan",
+                                   {"categories": cats, "min_severity": "high"} if cats else {"min_severity": "high"}))
+                steps.append(_derive("Propose one notification per affected employee", ["notify_employee"], "notify_from_scan"))
+        elif wants_action and _has(q, "propose", "remediat", "take action", "what should", "fix", "next step", "should i",
+                                   "should we", "recommend", "what actions", "which actions"):
             intent, compose = "action", "actions"
             cats = self._categories(q)
             steps.append(_step("Scan the fleet for issues", "run_fleet_health_scan", {"categories": cats, "min_severity": "high"} if cats else {"min_severity": "high"}))
             steps.append(_derive("Propose the detector-recommended action for each high-severity finding",
                                  ["create_upgrade_order", "open_remediation_ticket", "flag_device_for_replacement", "notify_employee"],
                                  "from_scan"))
-        elif _has(q, "drift", "over time", "trend", "worsen", "regress") and _has(q, "complian", "check", "screen", "encrypt", "up to date"):
+        elif _has(q, "drift", "over time", "trend", "worse", "regress", "deteriorat", "stopped", "no longer", "started failing",
+                  "began failing") and _has(q, "complian", "check", "screen", "encrypt", "up to date"):
             intent, compose = "insight", "insights"
             steps.append(_step("Detect compliance drift over the window", "detect_compliance_drift",
                                {"check_id": e["checks"][0]} if len(e["checks"]) == 1 else {}))
+        elif devs and not _has(q, "trend", "over time", "history", "consistent", "declin"):
+            # A question about named devices: their full latest record answers RAM, disk, battery, OS, software and checks.
+            compose = "details"
+            for d in devs:
+                steps.append(_step(f"Get the latest record for {d}", "get_device_details", {"device_id": d}))
         elif _has(q, "battery", "batteries"):
             intent, compose = "insight", "insights"
             steps.append(_step("Detect batteries approaching end-of-life", "detect_battery_health"))
@@ -145,10 +169,11 @@ class RuleBasedReasoner:
             intent, compose = "insight", "insights"
             steps.append(_step("Detect sustained/intermittent RAM pressure", "detect_memory_pressure"))
             assumptions.append(f"'Constrained' = memory used >= {th.high_memory_used_pct:.0f}%; 'consistently' = in >= {th.memory_sustained_share:.0%} of snapshots.")
-        elif _has(q, "disk", "storage", "space", "ssd") and _has(q, "consistent", "over time", "trend", "running out", "declin", "fill"):
+        elif (_has(q, "disk", "storage", "space", "ssd") and not e["checks"]
+              and _has(q, "consistent", "over time", "trend", "running out", "declin", "fill")):
             intent, compose = "insight", "insights"
             steps.append(_step("Detect storage pressure and depletion trends", "detect_storage_pressure"))
-        elif _has(q, "disk", "storage", "space", "ssd"):
+        elif _has(q, "disk", "storage", "space", "ssd") and not e["checks"]:
             compose = "low_disk"
             steps.append(_step("Find devices whose latest free disk is below the low-disk threshold", "find_devices",
                                {"low_disk": True, **({"device_type": e["device_type"]} if e["device_type"] else {})}))
@@ -156,10 +181,17 @@ class RuleBasedReasoner:
         elif e["os_bound"]:
             compose = "os_version"
             ob = e["os_bound"]
-            steps.append(_step(f"Find devices running {ob['os_name']} older than {ob['below']}", "find_devices",
+            what = f"{ob['os_name']} {ob['at_least']}" if "at_least" in ob else f"{ob['os_name']} older than {ob['below']}"
+            steps.append(_step(f"Find devices running {what}", "find_devices",
                                {"os_name": ob["os_name"], "os_version_below": ob["below"],
+                                **({"os_version_at_least": ob["at_least"]} if "at_least" in ob else {}),
                                 **({"device_type": e["device_type"]} if e["device_type"] else {})}))
             assumptions.append(f"Only {ob['os_name']} devices are comparable to a {ob['os_name']} version; other OS families are reported separately.")
+        elif e["checks"] == ["os_up_to_date"] and e["os_family"]:
+            compose = "devices"
+            steps.append(_step(f"Find {e['os_family']} devices failing the os_up_to_date check", "find_devices",
+                               {"os_name": e["os_family"], "failing_check_id": "os_up_to_date"}))
+            assumptions.append("'Outdated' = failing the os_up_to_date compliance check reported by the device agent.")
         elif _has(q, "complian", "failing", "fail ", "fails", "non-compliant") or e["checks"] or e["severity"]:
             compose = "compliance"
             args = {"status": "fail"}
@@ -308,6 +340,14 @@ class RuleBasedReasoner:
                                            ". Please address this or contact the IT team for help.")
                     calls.append({"name": "notify_employee", "args": {"employee_id": emp, "message": msg[:1000]}})
             return calls
+        if kind == "notify_from_scan":
+            calls, seen = [], set()
+            for ins in self._insights(state, "run_fleet_health_scan"):
+                for a in ins["recommended_actions"]:
+                    if a["tool"] == "notify_employee" and a["args"]["employee_id"] not in seen:
+                        seen.add(a["args"]["employee_id"])
+                        calls.append({"name": "notify_employee", "args": a["args"]})
+            return calls
         if kind == "from_scan":
             calls, seen = [], set()
             for ins in self._insights(state, "run_fleet_health_scan"):
@@ -347,7 +387,9 @@ class RuleBasedReasoner:
                         f"({r['disk_free_gb']} GB of {r['disk_size_gb']} GB) on {r['snapshot_date']} [{r['evidence_id']}]" for r in rows]
             elif mode == "os_version":
                 crit = data["criteria"]
-                head = (f"{len(rows)} devices run {crit['os_name']} older than {crit['os_version_below']} [{scope}]" + (":" if rows else "."))
+                version = (f"{crit['os_version_at_least']} (at least {crit['os_version_at_least']}, below {crit['os_version_below']})"
+                           if "os_version_at_least" in crit else f"older than {crit['os_version_below']}")
+                head = f"{len(rows)} devices run {crit['os_name']} {version} [{scope}]" + (":" if rows else ".")
                 body = [f"- {r['device_id']} ({r['model']}, {r['employee_id']}): {r['os']} as of {r['snapshot_date']} [{r['evidence_id']}]" for r in rows]
                 if data["not_comparable_other_os_family"]:
                     body.append(f"{len(data['not_comparable_other_os_family'])} other devices run a different OS family and were not "

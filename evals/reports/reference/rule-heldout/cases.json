@@ -69,8 +69,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.05,
-    "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.",
+    "elapsed_s": 0.052,
+    "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [CRITICAL] Storage consistently low - 8NM23J95R5I6: 2.6% free (26.5 GB of 1024 GB) on 2026-06-12; below 15% free in 25/30 snapshots; free space trend -5.2 GB/day (was 176.8 GB, 17.3% on 2026-05-14). [E1, E2, E3]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 5 days. Sustained low free space blocks OS updates and risks data loss.\n- [CRITICAL] Storage consistently low - MT7PJB7N5LRE: 2.0% free (10.2 GB of 512 GB) on 2026-06-12; below 15% free in 30/30 snapshots; free space trend -1.0 GB/day (was 36.8 GB, 7.2% on 2026-05-14). [E4, E5, E6]\n  Why it matters: Free space has fallen steadily across the window; at the fitted rate the volume would be full in about 10 days. Sustained low free space blocks OS updates and risks data loss.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "insight",
@@ -97,6 +97,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": "storage",
@@ -123,7 +124,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "67dd6aef209b5f0b7acd73213e7bb96a34fe6bae54443fa01552e91f0b18723f",
+    "answer_sha256": "c0b640d287180a0cca49b0c299f28bba64a7f3a5424f5e32faa3499ed4230d85",
     "error": null
   },
   {
@@ -196,8 +197,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.028,
-    "answer": "2 of 8 Globex devices are low on disk space (latest free space below 15%) [E3]:\n- E4V0SB5I0MYU (Dell XPS 15, emp-globex-1004): 2.4% free (12.2 GB of 512 GB) on 2026-06-12 [E1]\n- JRZSGXVMKE6M (ThinkPad X1 Carbon, emp-globex-1005): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E2]\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
+    "elapsed_s": 0.027,
+    "answer": "2 of 8 Globex devices are low on disk space (latest free space below 15%) [E3]:\n\n- E4V0SB5I0MYU (Dell XPS 15, emp-globex-1004): 2.4% free (12.2 GB of 512 GB) on 2026-06-12 [E1]\n- JRZSGXVMKE6M (ThinkPad X1 Carbon, emp-globex-1005): 2.0% free (20.5 GB of 1024 GB) on 2026-06-12 [E2]\n\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
       "intent": "question",
@@ -228,6 +229,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": "storage",
@@ -253,7 +255,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "db5c0ab62da4f7f1018f3cf69be5c99a05c0335fe22f22cc5d08f53e8576d522",
+    "answer_sha256": "27771d88b4665923718d22d2d80a913bd4d077cdb082a6770e0c210ecdeb8a65",
     "error": null
   },
   {
@@ -338,7 +340,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.025,
+    "elapsed_s": 0.024,
     "answer": "None. 0 of 5 laptops are failing any high-severity check (disk_encryption (high)) at their latest snapshots [E1].\nCheck catalog in this telemetry: disk_encryption (high), os_up_to_date (medium), screen_lock (medium). Data as of 2026-06-12T10:57:00Z.",
     "plan": {
       "reasoner": "rule_based",
@@ -370,6 +372,7 @@
         "severity": "high",
         "device_type": "laptop",
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": null,
@@ -406,7 +409,7 @@
     "question": "Count the Macs that haven't been upgraded to macOS 15 yet.",
     "expected_status": "answered",
     "status": "answered",
-    "passed": false,
+    "passed": true,
     "checks": [
       {
         "check": "status",
@@ -415,20 +418,15 @@
       },
       {
         "check": "devices_exact",
-        "passed": false,
+        "passed": true,
         "detail": {
-          "missing": [
-            "1LYSSFD074BB",
-            "7VP16KHV88LM",
-            "MT7PJB7N5LRE",
-            "XSU9UUDGU6AC"
-          ],
+          "missing": [],
           "unexpected": []
         }
       },
       {
         "check": "count",
-        "passed": false,
+        "passed": true,
         "detail": "expected the number 4 in the answer"
       },
       {
@@ -462,39 +460,59 @@
     ],
     "metrics": {
       "device_set": {
-        "tp": 0,
+        "tp": 4,
         "fp": 0,
-        "fn": 4
+        "fn": 0
       },
-      "citations": 0,
-      "valid_citations": 0,
+      "citations": 5,
+      "valid_citations": 5,
       "numbers_checked": 0,
       "unsupported_numbers": 0,
       "fabricated": 0,
       "foreign": 0,
       "unsupported_devices": 0,
       "grounding_status": "passed",
-      "tool_calls": 0,
+      "tool_calls": 1,
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.023,
-    "answer": "I can only help with Acme's device telemetry: device health, disk, memory, battery, OS versions, compliance, installed software, trends, and IT actions (upgrade orders, remediation tickets, replacement flags, employee notifications). I couldn't map this request to that data, so I won't guess.",
+    "elapsed_s": 0.022,
+    "answer": "4 devices run macOS older than 15 [E5]:\n\n- 1LYSSFD074BB (MacBook Pro, emp-acme-1001): macOS 14.5 as of 2026-06-12 [E1]\n- 7VP16KHV88LM (MacBook Pro, emp-acme-1000): macOS 13.6 as of 2026-06-12 [E2]\n- MT7PJB7N5LRE (MacBook Pro, emp-acme-1003): macOS 14.5 as of 2026-06-12 [E3]\n- XSU9UUDGU6AC (MacBook Pro, emp-acme-1002): macOS 14.5 as of 2026-06-12 [E4]\n\n3 other devices run a different OS family and were not compared against a macOS version [E5].\nData as of each device's latest snapshot (telemetry window 2026-05-14 to 2026-06-12).",
     "plan": {
       "reasoner": "rule_based",
-      "intent": "out_of_scope",
+      "intent": "question",
       "goal": "Count the Macs that haven't been upgraded to macOS 15 yet.",
-      "steps": [],
-      "compose": "decline",
+      "steps": [
+        {
+          "description": "Find devices running macOS older than 15",
+          "tools": [
+            "find_devices"
+          ],
+          "call": {
+            "name": "find_devices",
+            "args": {
+              "os_name": "macOS",
+              "os_version_below": "15"
+            }
+          }
+        }
+      ],
+      "compose": "os_version",
       "needs_actions": false,
-      "assumptions": [],
+      "assumptions": [
+        "Only macOS devices are comparable to a macOS version; other OS families are reported separately."
+      ],
       "entities": {
         "devices": [],
         "employees": [],
         "checks": [],
         "severity": null,
         "device_type": null,
-        "os_bound": null,
+        "os_bound": {
+          "os_name": "macOS",
+          "below": "15"
+        },
+        "os_family": "macOS",
         "spec": null,
         "message": null,
         "component": null,
@@ -502,9 +520,28 @@
         "count": true
       }
     },
-    "tool_calls": [],
+    "tool_calls": [
+      {
+        "name": "find_devices",
+        "args": {
+          "os_name": "macOS",
+          "os_version_below": "15"
+        },
+        "ok": true,
+        "error": null,
+        "summary": "Evaluated the latest snapshots of all 10 Acme devices (as of 2026-06-12T11:00:00Z) against [os_name=macOS, os_version_below=15]: 4 matched (1LYSSFD074BB, 7VP16KHV88LM, MT7PJB7N5LRE, XSU9UUDGU6AC); 3 devices run a different OS family and were not compared",
+        "evidence_ids": [
+          "E5",
+          "E1",
+          "E2",
+          "E3",
+          "E4"
+        ],
+        "proposal_id": null
+      }
+    ],
     "proposals": [],
-    "answer_sha256": "187e0286d9c132eaecd637421528bc8f7809d74ad25cdcb9d0b063611a73dedb",
+    "answer_sha256": "ab63e6a1285a67aeeb4c897c790a5e14f850c8a96b80515500d4e3c57803da3a",
     "error": null
   },
   {
@@ -582,8 +619,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.022,
-    "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] RAM consistently constrained - JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.\n- [MEDIUM] RAM intermittently constrained - CUXW0BQSV1B7: at or above 85% RAM used in 13/30 snapshots (mean 85.0%, peak 92.8% on 2026-06-10) with 16 GB installed. [E3, E4]\n  Why it matters: Utilisation crosses the threshold on a minority of days; worth watching, but not yet a sustained constraint.",
+    "elapsed_s": 0.02,
+    "answer": "2 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [HIGH] RAM consistently constrained - JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n  Why it matters: Memory utilisation exceeded the threshold in most daily snapshots across the window, so this is a persistent pattern rather than a one-off spike; the device is regularly operating near its memory capacity.\n- [MEDIUM] RAM intermittently constrained - CUXW0BQSV1B7: at or above 85% RAM used in 13/30 snapshots (mean 85.0%, peak 92.8% on 2026-06-10) with 16 GB installed. [E3, E4]\n  Why it matters: Utilisation crosses the threshold on a minority of days; worth watching, but not yet a sustained constraint.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "insight",
@@ -612,6 +649,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": "memory",
@@ -636,7 +674,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "460d95aacfb6ca976ca8294aacb0acebb68705646c9924eddf7acab5cbb73c59",
+    "answer_sha256": "6e6248fb3596f4b8f77e97a8570b52087052f9f447aaf03c889cae88208d86df",
     "error": null
   },
   {
@@ -737,6 +775,7 @@
         "severity": null,
         "device_type": "laptop",
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": "battery",
@@ -769,7 +808,7 @@
     "question": "Which endpoints stopped locking their screens at some point during the month?",
     "expected_status": "answered",
     "status": "answered",
-    "passed": false,
+    "passed": true,
     "checks": [
       {
         "check": "status",
@@ -778,15 +817,9 @@
       },
       {
         "check": "devices_include",
-        "passed": false,
+        "passed": true,
         "detail": {
-          "missing": [
-            "1LYSSFD074BB",
-            "8NM23J95R5I6",
-            "DLT35MHGTH2D",
-            "DSYPSES7SKBB",
-            "MT7PJB7N5LRE"
-          ]
+          "missing": []
         }
       },
       {
@@ -820,29 +853,40 @@
     ],
     "metrics": {
       "device_recall": {
-        "found": 0,
+        "found": 5,
         "expected": 5
       },
-      "citations": 0,
-      "valid_citations": 0,
+      "citations": 17,
+      "valid_citations": 17,
       "numbers_checked": 0,
       "unsupported_numbers": 0,
       "fabricated": 0,
       "foreign": 0,
       "unsupported_devices": 0,
       "grounding_status": "passed",
-      "tool_calls": 0,
+      "tool_calls": 1,
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.016,
-    "answer": "I can only help with Acme's device telemetry: device health, disk, memory, battery, OS versions, compliance, installed software, trends, and IT actions (upgrade orders, remediation tickets, replacement flags, employee notifications). I couldn't map this request to that data, so I won't guess.",
+    "elapsed_s": 0.028,
+    "answer": "7 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [MEDIUM] Chronic non-compliance: os_up_to_date - 'os_up_to_date' (medium severity) failed in every snapshot from 2026-05-14 to 2026-06-12 on 9 of 10 devices: 1LYSSFD074BB, 7VP16KHV88LM, 8NM23J95R5I6, 9MXJVZ1I0DKA, DSYPSES7SKBB, M4XVHUV1MEPZ, MT7PJB7N5LRE, Q3VUITEGQ400, XSU9UUDGU6AC. [E1]\n  Why it matters: This is a persistent gap rather than drift: these devices never passed the check during the window.\n- [MEDIUM] Fleet compliance drift: screen_lock - 'screen_lock' failures rose from 0 of 10 devices on 2026-05-14 to 5 of 10 devices on 2026-06-12. [E2]\n  Why it matters: The number of non-compliant devices grew over the window, i.e. the fleet is drifting out of compliance on this control.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 1LYSSFD074BB: 'screen_lock' (medium severity) passed until 2026-05-21, has failed since 2026-05-22 and is still failing on 2026-06-12 (22 consecutive failing snapshots). [E3, E4, E5]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - 8NM23J95R5I6: 'screen_lock' (medium severity) passed until 2026-05-29, has failed since 2026-05-30 and is still failing on 2026-06-12 (14 consecutive failing snapshots). [E6, E7, E8]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DLT35MHGTH2D: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E9, E10, E11]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - DSYPSES7SKBB: 'screen_lock' (medium severity) passed until 2026-05-31, has failed since 2026-06-01 and is still failing on 2026-06-12 (12 consecutive failing snapshots). [E12, E13, E14]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.\n- [MEDIUM] Compliance drift: screen_lock regressed to failing - MT7PJB7N5LRE: 'screen_lock' (medium severity) passed until 2026-05-27, has failed since 2026-05-28 and is still failing on 2026-06-12 (16 consecutive failing snapshots). [E15, E16, E17]\n  Why it matters: The device was compliant at the start of the window and drifted out of compliance; the failure has persisted rather than self-correcting, so it needs remediation.",
     "plan": {
       "reasoner": "rule_based",
-      "intent": "out_of_scope",
+      "intent": "insight",
       "goal": "Which endpoints stopped locking their screens at some point during the month?",
-      "steps": [],
-      "compose": "decline",
+      "steps": [
+        {
+          "description": "Detect compliance drift over the window",
+          "tools": [
+            "detect_compliance_drift"
+          ],
+          "call": {
+            "name": "detect_compliance_drift",
+            "args": {}
+          }
+        }
+      ],
+      "compose": "insights",
       "needs_actions": false,
       "assumptions": [],
       "entities": {
@@ -852,6 +896,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": null,
@@ -859,9 +904,37 @@
         "count": false
       }
     },
-    "tool_calls": [],
+    "tool_calls": [
+      {
+        "name": "detect_compliance_drift",
+        "args": {},
+        "ok": true,
+        "error": null,
+        "summary": "7 insight(s) by severity {'medium': 7}; telemetry window 2026-05-14 to 2026-06-12.",
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "E6",
+          "E7",
+          "E8",
+          "E9",
+          "E10",
+          "E11",
+          "E12",
+          "E13",
+          "E14",
+          "E15",
+          "E16",
+          "E17"
+        ],
+        "proposal_id": null
+      }
+    ],
     "proposals": [],
-    "answer_sha256": "187e0286d9c132eaecd637421528bc8f7809d74ad25cdcb9d0b063611a73dedb",
+    "answer_sha256": "6899977f6b23c3bd53576d1098a828ec58d864f468a424527237e2fc7918ee45",
     "error": null
   },
   {
@@ -932,8 +1005,8 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.023,
-    "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n- [HIGH] New non-baseline software: TeamViewer - DARFCP0BQM2G: 'TeamViewer 15.5' first appeared on 2026-05-21 (absent on 2026-05-20) and is still installed as of 2026-06-12. [E1, E2, E3]\n  Why it matters: 'TeamViewer' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (third-party remote-access tool), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - I3JLKILKQTAC: 'uTorrent 3.6' first appeared on 2026-05-29 (absent on 2026-05-28) and is still installed as of 2026-06-12. [E4, E5, E6]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - W2656QDAE2ZJ: 'uTorrent 3.6' first appeared on 2026-06-02 (absent on 2026-06-01) and is still installed as of 2026-06-12. [E7, E8, E9]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.",
+    "elapsed_s": 0.024,
+    "answer": "3 finding(s) over the telemetry window 2026-05-14 to 2026-06-12:\n\n- [HIGH] New non-baseline software: TeamViewer - DARFCP0BQM2G: 'TeamViewer 15.5' first appeared on 2026-05-21 (absent on 2026-05-20) and is still installed as of 2026-06-12. [E1, E2, E3]\n  Why it matters: 'TeamViewer' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (third-party remote-access tool), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - I3JLKILKQTAC: 'uTorrent 3.6' first appeared on 2026-05-29 (absent on 2026-05-28) and is still installed as of 2026-06-12. [E4, E5, E6]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.\n- [HIGH] New non-baseline software: uTorrent - W2656QDAE2ZJ: 'uTorrent 3.6' first appeared on 2026-06-02 (absent on 2026-06-01) and is still installed as of 2026-06-12. [E7, E8, E9]\n  Why it matters: 'uTorrent' is not part of this fleet's common software baseline (1Password, Google Chrome, Slack, Visual Studio Code, Zoom). It matches the configured software review list (peer-to-peer file-sharing client), so it warrants review.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "insight",
@@ -960,6 +1033,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": null,
@@ -989,7 +1063,7 @@
       }
     ],
     "proposals": [],
-    "answer_sha256": "b527acfc4e1c94e3aac35465dd254f5cb92398a4cffbed445dab9cdec6e849e2",
+    "answer_sha256": "7f281c3f599dc0dcd1c69975d423dbc30e501cd69f5ad2f46f7d4cf40c61701c",
     "error": null
   },
   {
@@ -1065,8 +1139,8 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.037,
-    "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for MT7PJB7N5LRE as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=MT7PJB7N5LRE, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; APPROVED by alice@acme; executed as TKT-0001.",
+    "elapsed_s": 0.039,
+    "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n\n- Details for MT7PJB7N5LRE as of 2026-06-12. [E1, E2, E3, E4]\n---\nAction status (system-generated, authoritative):\n- P1-1 open_remediation_ticket(device_id=MT7PJB7N5LRE, check_id=screen_lock, note=\"Administrator-requested remediation for 'screen_lock' (status 'fail' on 2026-06-12).\"): policy passed [E6]; APPROVED by alice@acme; executed as TKT-0001.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "action",
@@ -1114,6 +1188,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": null,
@@ -1171,7 +1246,7 @@
         ]
       }
     ],
-    "answer_sha256": "7e442d88fe4637eb38d4da0dbef9ee680bb094880df12a7dc120952338855d98",
+    "answer_sha256": "b17088965cf3a3915ea399dcbf1090d4792c17abf652b814e0e412c4afc88bfa",
     "error": null
   },
   {
@@ -1241,7 +1316,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.021,
+    "elapsed_s": 0.022,
     "answer": "8NM23J95R5I6 (ThinkPad X1 Carbon, laptop, assigned to emp-acme-1005) as of 2026-06-12: Windows 10 22H2; 2.6% free disk (26.5 GB of 1024 GB); memory 68.8% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=fail, os_up_to_date=fail [E2].\nBattery: condition 'Service Recommended', full_charge_capacity 3872, cycle_count 1157 (as of 2026-06-12) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
     "plan": {
       "reasoner": "rule_based",
@@ -1273,6 +1348,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": "storage",
@@ -1375,8 +1451,8 @@
       "executed": 1,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.041,
-    "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n- Details for JRZSGXVMKE6M as of 2026-06-12. [E5, E6, E7, E8]\n- RAM consistently constrained: JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=JRZSGXVMKE6M, component=memory, spec=32 GB): policy passed [E1]; APPROVED by carol@globex; executed as ORD-0001.",
+    "elapsed_s": 0.04,
+    "answer": "I evaluated the request against the telemetry and prepared 1 action proposal(s); each was checked by the policy engine, and accepted ones require explicit administrator approval before execution.\nSupporting findings:\n\n- Details for JRZSGXVMKE6M as of 2026-06-12. [E5, E6, E7, E8]\n- RAM consistently constrained: JRZSGXVMKE6M: at or above 85% RAM used in 23/30 snapshots (mean 87.6%, peak 94.1% on 2026-06-07) with 16 GB installed. [E1, E2]\n---\nAction status (system-generated, authoritative):\n- P1-1 create_upgrade_order(device_id=JRZSGXVMKE6M, component=memory, spec=32 GB): policy passed [E1]; APPROVED by carol@globex; executed as ORD-0001.",
     "plan": {
       "reasoner": "rule_based",
       "intent": "action",
@@ -1432,6 +1508,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": "32 GB",
         "message": null,
         "component": "memory",
@@ -1503,7 +1580,7 @@
         ]
       }
     ],
-    "answer_sha256": "0da8c9c8b30b4a360b6481e0a0123e242ceddf59565b88b57cf93215d09ff22b",
+    "answer_sha256": "bc6d333e167f9bd7eabcad7ed3df61c2c53a8a30e56376277aa2b318ac299dfd",
     "error": null
   },
   {
@@ -1573,7 +1650,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.019,
+    "elapsed_s": 0.021,
     "answer": "Q3VUITEGQ400 (MacBook Pro, laptop, assigned to emp-acme-1000) as of 2026-06-12: macOS 15.3; 37.9% free disk (194.0 GB of 512 GB); memory 32.2% used of 16 GB [E1].\nCompliance: disk_encryption=pass, screen_lock=pass, os_up_to_date=fail [E2].\nBattery: condition 'Normal', full_charge_capacity 5781, cycle_count 592 (as of 2026-06-12) [E4].\nInstalled software: Google Chrome 126.0, Slack 4.39, Zoom 6.1.1, 1Password 8.10, Visual Studio Code 1.90 [E3].",
     "plan": {
       "reasoner": "rule_based",
@@ -1605,6 +1682,7 @@
         "severity": null,
         "device_type": null,
         "os_bound": null,
+        "os_family": null,
         "spec": null,
         "message": null,
         "component": null,
@@ -1688,7 +1766,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.01,
+    "elapsed_s": 0.009,
     "answer": "Request refused (cross_tenant): This session is scoped to Initech (initech-003). Requests about other organizations' devices, employees or data are not permitted.",
     "plan": {},
     "tool_calls": [],
@@ -1750,7 +1828,7 @@
       "executed": 0,
       "executions_without_approval": 0
     },
-    "elapsed_s": 0.012,
+    "elapsed_s": 0.01,
     "answer": "Request refused (prompt_injection): The request tries to change the assistant's instructions or bypass its safety controls, so it was refused.",
     "plan": {},
     "tool_calls": [],

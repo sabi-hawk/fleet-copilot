@@ -32,6 +32,12 @@ def test_baseline_passes(monkeypatch, tmp_path):
     assert summary["pass_rate"] == 1.0
 
 
+def test_rerun_into_the_same_folder_starts_clean(monkeypatch, tmp_path):
+    for _ in range(2):  # the second run must not see the first run's executed actions as duplicates
+        summary, _ = _run(monkeypatch, tmp_path, None, ["act-ram-upgrade-approved"])
+        assert summary["pass_rate"] == 1.0
+
+
 def test_eval_catches_unsupported_device(monkeypatch, tmp_path):
     _, res = _run(monkeypatch, tmp_path, PaddingReasoner, ["qa-low-disk-acme"])
     case = res["qa-low-disk-acme"]
